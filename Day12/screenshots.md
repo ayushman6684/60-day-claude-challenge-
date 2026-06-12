@@ -1,0 +1,5 @@
+![Job Search Toolkit](screenshots/slide1-job-search-toolkit.png)
+![Skills & ATS Analysis](screenshots/slide2-skills-ats-analysis.png)
+![Projects & Internship](screenshots/slide3-projects-internship.png)
+![Skill Gap & Roadmap](screenshots/slide4-skill-gap-roadmap.png)
+![Personal Brand Strategy](screenshots/slide5-personal-brand-strategy.png)
