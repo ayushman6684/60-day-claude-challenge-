@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>PA Journey Simulator — StarCare Health</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@600;700&display=swap');
+
+:root{
+  --bg:#0D0F14;
+  --surface:#13161E;
+  --card:#181C27;
+  --card2:#1E2333;
+  --border:#252A3A;
+  --border2:#2E3448;
+  --text:#F0F2F8;
+  --text2:#8B93B0;
+  --text3:#525A73;
+  --accent:#6366F1;
+  --accent2:#818CF8;
+  --accent-bg:rgba(99,102,241,0.12);
+  --accent-border:rgba(99,102,241,0.3);
+  --teal:#14B8A6;
+  --teal-bg:rgba(20,184,166,0.1);
+  --teal-border:rgba(20,184,166,0.25);
+  --rose:#F43F5E;
+  --rose-bg:rgba(244,63,94,0.1);
+  --rose-border:rgba(244,63,94,0.25);
+  --amber:#F59E0B;
+  --amber-bg:rgba(245,158,11,0.1);
+  --amber-border:rgba(245,158,11,0.25);
+  --green:#10B981;
+  --green-bg:rgba(16,185,129,0.1);
+  --green-border:rgba(16,185,129,0.25);
+  --violet:#A78BFA;
+  --violet-bg:rgba(167,139,250,0.1);
+  --violet-border:rgba(167,139,250,0.25);
+  --r:14px;
+  --r2:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideRight{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideLeft{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
+@keyframes popIn{from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+@keyframes shimmer{from{background-position:-200% 0}to{background-position:200% 0}}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(99,102,241,0)}50%{box-shadow:0 0 20px 4px rgba(99,102,241,0.18)}}
+@keyframes typeDot{0%,80%,100%{transform:scale(0.6);opacity:0.4}40%{transform:scale(1);opacity:1}}
+@keyframes progressFill{from{width:0}to{width:var(--w)}}
+@keyframes checkPop{0%{transform:scale(0) rotate(-10deg)}70%{transform:scale(1.15) rotate(3deg)}100%{transform:scale(1) rotate(0deg)}}
+
+.fade-up{animation:fadeUp 0.35s cubic-bezier(.22,1,.36,1) both}
+.fade-in{animation:fadeIn 0.25s ease both}
+.slide-right{animation:slideRight 0.32s cubic-bezier(.22,1,.36,1) both}
+.slide-left{animation:slideLeft 0.32s cubic-bezier(.22,1,.36,1) both}
+.pop-in{animation:popIn 0.28s cubic-bezier(.22,1,.36,1) both}
+.check-pop{animation:checkPop 0.4s cubic-bezier(.22,1,.36,1) both}
+
+/* ─── LAYOUT ─── */
+#app{max-width:680px;margin:0 auto;padding:1.5rem 1rem 5rem}
+
+/* ─── HEADER ─── */
+#hdr{display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:var(--r)}
+#hdr-logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#6366F1,#8B5CF6);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+#hdr-logo i{font-size:19px;color:#fff}
+#hdr-info h1{font-family:'Sora',sans-serif;font-size:14px;font-weight:700;color:var(--text);letter-spacing:-0.01em}
+#hdr-info p{font-size:11px;color:var(--text3);margin-top:2px}
+#hdr-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.pill{font-size:11px;font-weight:500;padding:3px 10px;border-radius:99px}
+#mode-toggle{width:32px;height:32px;border-radius:8px;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+#mode-toggle:hover{border-color:var(--accent-border);background:var(--accent-bg)}
+#mode-toggle i{font-size:15px;color:var(--text2)}
+
+/* ─── PROGRESS AREA ─── */
+#progress-area{margin-bottom:1.25rem}
+#progress-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+#progress-label{font-size:12px;font-weight:500;color:var(--text2)}
+#progress-pct{font-size:11px;color:var(--text3)}
+#progress-bar{height:4px;background:var(--border);border-radius:99px;overflow:hidden}
+#progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#6366F1,#8B5CF6,#A78BFA);transition:width 0.5s cubic-bezier(.22,1,.36,1)}
+
+/* ─── TIMELINE ─── */
+#tl-wrap{display:flex;align-items:flex-start;gap:0;margin-bottom:1.25rem;overflow-x:auto;padding-bottom:2px}
+#tl-wrap::-webkit-scrollbar{height:0}
+.tl-item{display:flex;flex-direction:column;align-items:center;flex:1;min-width:60px;position:relative}
+.tl-item:not(:last-child)::after{content:'';position:absolute;top:13px;left:50%;width:100%;height:1px;background:var(--border);z-index:0;transition:background .3s}
+.tl-item.done::after{background:linear-gradient(90deg,#6366F1,#8B5CF6)}
+.tl-dot{width:27px;height:27px;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:1;position:relative;border:2px solid var(--border);background:var(--card);transition:all .3s;font-size:11px;font-weight:600;color:var(--text3)}
+.tl-item.done .tl-dot{background:linear-gradient(135deg,#6366F1,#8B5CF6);border-color:transparent;color:#fff}
+.tl-item.active .tl-dot{background:var(--accent-bg);border-color:var(--accent);color:var(--accent2)}
+.tl-item.active .tl-dot{animation:glow 2.5s ease-in-out infinite}
+.tl-lbl{font-size:9px;margin-top:5px;text-align:center;line-height:1.3;max-width:54px}
+.tl-item.done .tl-lbl{color:var(--accent2)}
+.tl-item.active .tl-lbl{color:var(--accent2);font-weight:600}
+.tl-item:not(.done):not(.active) .tl-lbl{color:var(--text3)}
+
+/* ─── STAGE CARD ─── */
+#stage-card{display:flex;align-items:flex-start;gap:12px;padding:12px 15px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);margin-bottom:1rem;transition:all .3s}
+#stage-icon{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px;transition:all .3s}
+#stage-meta-tag{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:3px}
+#stage-meta-title{font-family:'Sora',sans-serif;font-size:16px;font-weight:700;color:var(--text);letter-spacing:-.02em;line-height:1.2}
+#stage-meta-sub{font-size:12px;color:var(--text3);margin-top:3px}
+#scene-counter{margin-left:auto;flex-shrink:0;font-size:11px;font-weight:600;color:var(--text3);background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:3px 10px;white-space:nowrap}
+
+/* ─── CHAT ─── */
+#chat{display:flex;flex-direction:column;gap:10px;margin-bottom:1rem;min-height:200px}
+
+.narrator-row{display:flex;align-items:center;gap:8px;padding:4px 0}
+.narrator-line{flex:1;height:1px;background:var(--border)}
+.narrator-text{font-size:11px;color:var(--text3);font-style:italic;padding:0 10px;white-space:nowrap}
+
+.msg-row{display:flex;align-items:flex-end;gap-10px gap:9px}
+.msg-row.right{flex-direction:row-reverse}
+.av-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.av-name{font-size:9px;font-weight:500;color:var(--text3);text-align:center;max-width:40px;line-height:1.2}
+.bub-wrap{max-width:72%;display:flex;flex-direction:column;gap:2px}
+.msg-row.right .bub-wrap{align-items:flex-end}
+.bub{padding:10px 14px;border-radius:16px;font-size:13.5px;line-height:1.65;position:relative}
+.bub.L{background:var(--card);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:4px}
+.bub.R{background:var(--accent-bg);border:1px solid var(--accent-border);color:#C7D2FE;border-bottom-right-radius:4px}
+.bub.R2{background:var(--teal-bg);border:1px solid var(--teal-border);color:#99F6E4;border-bottom-right-radius:4px}
+.bub b{font-weight:600;color:var(--text)}
+.bub.R b{color:#E0E7FF}
+.bub.R2 b{color:#CCFBF1}
+
+.typing-indicator{display:flex;align-items:center;gap:4px;padding:12px 16px;background:var(--card);border:1px solid var(--border);border-radius:16px;border-bottom-left-radius:4px;width:fit-content}
+.typing-dot{width:7px;height:7px;border-radius:50%;background:var(--text3)}
+.typing-dot:nth-child(1){animation:typeDot 1.2s ease 0s infinite}
+.typing-dot:nth-child(2){animation:typeDot 1.2s ease 0.2s infinite}
+.typing-dot:nth-child(3){animation:typeDot 1.2s ease 0.4s infinite}
+
+/* ─── INFO CARDS ─── */
+.info-card{border-radius:var(--r2);padding:11px 14px;font-size:13px;line-height:1.6;margin-left:43px;max-width:80%;border:1px solid}
+.info-card i{font-size:13px;vertical-align:-1px;margin-right:5px}
+.info-card.info{background:var(--accent-bg);border-color:var(--accent-border);color:#C7D2FE}
+.info-card.info i{color:var(--accent2)}
+.info-card.warn{background:var(--amber-bg);border-color:var(--amber-border);color:#FDE68A}
+.info-card.warn i{color:var(--amber)}
+.info-card.danger{background:var(--rose-bg);border-color:var(--rose-border);color:#FECDD3}
+.info-card.danger i{color:var(--rose)}
+.info-card.success{background:var(--green-bg);border-color:var(--green-border);color:#A7F3D0}
+.info-card.success i{color:var(--green)}
+.info-card b,.info-card strong{font-weight:600;color:inherit;opacity:1}
+
+/* ─── FLOW STRIP ─── */
+.flow-strip{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:10px 13px;background:var(--card);border:1px solid var(--border);border-radius:var(--r2);margin-left:43px;max-width:88%}
+.flow-node{background:var(--card2);border:1px solid var(--border2);border-radius:6px;padding:4px 10px;font-size:12px;color:var(--text);font-weight:500;white-space:nowrap}
+.flow-arrow{color:var(--text3);font-size:12px}
+
+/* ─── CHECKLIST ─── */
+.checklist{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-left:43px;max-width:86%}
+.cl-row{display:flex;align-items:flex-start;gap:11px;padding:10px 13px;border-bottom:1px solid var(--border)}
+.cl-row:last-child{border-bottom:none}
+.cl-icon{font-size:17px;flex-shrink:0;margin-top:1px}
+.cl-label{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
+.cl-desc{font-size:12px;color:var(--text2);line-height:1.5}
+
+/* ─── STAT BADGE ─── */
+.stat-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid;margin-left:43px}
+
+/* ─── CHOICES ─── */
+#choices-wrap{margin-top:4px}
+.choices-hdr{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.choices-hdr::before{content:'';flex:1;height:1px;background:var(--border)}
+.choices-hdr::after{content:'';flex:1;height:1px;background:var(--border)}
+.choices-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.choice-btn{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:13px 14px;cursor:pointer;text-align:left;transition:all .18s;position:relative;overflow:hidden}
+.choice-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(99,102,241,0.05),transparent);opacity:0;transition:opacity .18s}
+.choice-btn:hover{border-color:var(--accent-border);background:var(--accent-bg);transform:translateY(-1px)}
+.choice-btn:hover::before{opacity:1}
+.choice-btn.chosen{border-color:var(--accent);background:var(--accent-bg)}
+.choice-btn:disabled{opacity:.45;cursor:default;transform:none}
+.c-icon{font-size:19px;color:var(--accent2);margin-bottom:6px;display:block}
+.c-title{font-size:13px;font-weight:600;color:var(--text);display:block;margin-bottom:3px;line-height:1.3}
+.c-desc{font-size:12px;color:var(--text3);line-height:1.4}
+.next-btn{width:100%;margin-top:9px;padding:11px;border-radius:var(--r2);border:1px solid var(--border);background:var(--card);font-size:13.5px;font-weight:500;cursor:pointer;color:var(--text2);display:flex;align-items:center;justify-content:center;gap:7px;transition:all .18s;font-family:'Inter',sans-serif}
+.next-btn:hover{border-color:var(--accent-border);background:var(--accent-bg);color:var(--accent2)}
+.next-btn i{font-size:15px}
+
+/* ─── GLOSSARY ─── */
+#glossary-wrap{margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1.25rem}
+.gls-hdr{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:0;margin-bottom:0;user-select:none}
+.gls-hdr-left{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--text2)}
+.gls-hdr-left i{font-size:16px;color:var(--text3)}
+.gls-toggle{font-size:13px;color:var(--text3);transition:transform .2s}
+.gls-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;display:none}
+.gls-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:11px 13px}
+.gls-term{font-size:12px;font-weight:600;color:var(--accent2);margin-bottom:4px}
+.gls-def{font-size:12px;color:var(--text2);line-height:1.5}
+
+/* ─── FINISH ─── */
+#finish{display:none;margin-top:1rem}
+.finish-banner{background:var(--green-bg);border:1px solid var(--green-border);border-radius:var(--r);padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.finish-banner i{font-size:26px;color:var(--green);flex-shrink:0}
+.finish-banner h3{font-family:'Sora',sans-serif;font-size:15px;font-weight:700;color:#A7F3D0}
+.finish-banner p{font-size:12px;color:#6EE7B7;margin-top:2px}
+.metrics-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.metric-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:12px 14px}
+.metric-val{font-family:'Sora',sans-serif;font-size:22px;font-weight:700;color:var(--text)}
+.metric-lbl{font-size:11px;color:var(--text3);margin-top:3px}
+.tk-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.tk-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:13px}
+.tk-hdr{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.tk-hdr i{font-size:13px}
+.tk-card ul{list-style:none;display:flex;flex-direction:column;gap:6px}
+.tk-card li{font-size:12.5px;color:var(--text2);padding-left:15px;position:relative;line-height:1.5}
+.tk-card li::before{content:'→';position:absolute;left:0;color:var(--text3);font-size:11px;top:1px}
+.restart-btn{width:100%;padding:12px;border-radius:var(--r2);border:1px solid var(--border);background:var(--card);font-size:14px;font-weight:500;cursor:pointer;color:var(--text2);display:flex;align-items:center;justify-content:center;gap:8px;transition:all .18s;font-family:'Inter',sans-serif}
+.restart-btn:hover{border-color:var(--accent-border);background:var(--accent-bg);color:var(--accent2)}
+.restart-btn i{font-size:16px}
+
+/* ─── SPEEED CONTROL ─── */
+#speed-wrap{display:flex;align-items:center;gap:8px;margin-bottom:1rem;padding:9px 13px;background:var(--card);border:1px solid var(--border);border-radius:var(--r2)}
+#speed-wrap label{font-size:11px;color:var(--text3);white-space:nowrap}
+.speed-btn{padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;border:1px solid var(--border);background:transparent;color:var(--text3);cursor:pointer;transition:all .14s;font-family:'Inter',sans-serif}
+.speed-btn.active{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent2)}
+.speed-btn:hover:not(.active){border-color:var(--border2);color:var(--text2)}
+#auto-play-btn{margin-left:auto;display:flex;align-items:center;gap:5px;padding:4px 12px;border-radius:6px;font-size:11px;font-weight:600;border:1px solid var(--border);background:transparent;color:var(--text3);cursor:pointer;transition:all .14s;font-family:'Inter',sans-serif}
+#auto-play-btn:hover{border-color:var(--accent-border);color:var(--accent2);background:var(--accent-bg)}
+#auto-play-btn i{font-size:13px}
+
+/* ─── TOOLTIPS ─── */
+.has-tip{position:relative;cursor:help;border-bottom:1px dashed var(--accent-border)}
+.tip-box{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--card2);border:1px solid var(--border2);border-radius:8px;padding:7px 10px;font-size:11.5px;color:var(--text2);width:200px;z-index:100;pointer-events:none;opacity:0;transition:opacity .15s;line-height:1.5;font-style:normal}
+.has-tip:hover .tip-box{opacity:1}
+
+/* ─── SCENE JUMP ─── */
+#scene-jump-wrap{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:1rem}
+.sj-btn{padding:4px 10px;border-radius:6px;font-size:10px;font-weight:600;border:1px solid var(--border);background:transparent;color:var(--text3);cursor:pointer;transition:all .14s;font-family:'Inter',sans-serif;letter-spacing:.02em}
+.sj-btn:hover{border-color:var(--accent-border);color:var(--accent2)}
+.sj-btn.current{background:var(--accent-bg);border-color:var(--accent);color:var(--accent2)}
+.sj-btn.visited{border-color:var(--green-border);color:var(--green)}
+
+/* ─── LIGHT MODE ─── */
+body.light{
+  --bg:#F1F5FB;--surface:#FFFFFF;--card:#FFFFFF;--card2:#F8FAFF;--border:#E2E8F4;--border2:#D1D9F0;
+  --text:#1E2340;--text2:#4A5472;--text3:#94A3C0;
+  --accent-bg:rgba(99,102,241,0.07);--accent-border:rgba(99,102,241,0.22);
+  --teal-bg:rgba(20,184,166,0.07);--teal-border:rgba(20,184,166,0.2);
+  --rose-bg:rgba(244,63,94,0.07);--rose-border:rgba(244,63,94,0.2);
+  --amber-bg:rgba(245,158,11,0.07);--amber-border:rgba(245,158,11,0.2);
+  --green-bg:rgba(16,185,129,0.07);--green-border:rgba(16,185,129,0.2);
+}
+body.light .bub.L{background:#F8FAFF;border-color:var(--border)}
+body.light .bub.R{background:rgba(99,102,241,.08);color:#3730A3}
+body.light .bub.R2{background:rgba(20,184,166,.08);color:#115E59}
+body.light .bub.R b{color:#3730A3}
+body.light .bub.R2 b{color:#0D4E46}
+body.light .info-card.info{color:#3730A3}
+body.light .info-card.warn{color:#92400E}
+body.light .info-card.danger{color:#9F1239}
+body.light .info-card.success{color:#065F46}
+body.light .finish-banner h3{color:#065F46}
+body.light .finish-banner p{color:#047857}
+body.light #hdr-logo{background:linear-gradient(135deg,#4F46E5,#7C3AED)}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER -->
+  <div id="hdr" class="fade-up">
+    <div id="hdr-logo"><i class="ti ti-heart-rate-monitor"></i></div>
+    <div id="hdr-info">
+      <h1>PA Journey Simulator</h1>
+      <p>StarCare Health · Illustrative example · Healthcare education</p>
+    </div>
+    <div id="hdr-right">
+      <span class="pill" style="background:var(--accent-bg);border:1px solid var(--accent-border);color:var(--accent2)">8 scenes</span>
+      <div id="mode-toggle" title="Toggle light/dark mode" onclick="toggleMode()"><i class="ti ti-sun" id="mode-icon"></i></div>
+    </div>
+  </div>
+
+  <!-- SPEED + AUTOPLAY -->
+  <div id="speed-wrap" class="fade-up" style="animation-delay:.05s">
+    <label>Speed:</label>
+    <button class="speed-btn" onclick="setSpeed(0.5)">Slow</button>
+    <button class="speed-btn active" onclick="setSpeed(1)">Normal</button>
+    <button class="speed-btn" onclick="setSpeed(2)">Fast</button>
+    <button class="speed-btn" onclick="setSpeed(0)">Instant</button>
+    <button id="auto-play-btn" onclick="toggleAuto()"><i class="ti ti-player-play" id="auto-icon"></i>Auto-play</button>
+  </div>
+
+  <!-- SCENE JUMP -->
+  <div id="scene-jump-wrap" class="fade-up" style="animation-delay:.08s"></div>
+
+  <!-- PROGRESS -->
+  <div id="progress-area" class="fade-up" style="animation-delay:.1s">
+    <div id="progress-top">
+      <span id="progress-label">Starting journey…</span>
+      <span id="progress-pct">0%</span>
+    </div>
+    <div id="progress-bar"><div id="progress-fill" style="width:0%"></div></div>
+  </div>
+
+  <!-- TIMELINE -->
+  <div id="tl-wrap" class="fade-up" style="animation-delay:.12s"></div>
+
+  <!-- STAGE CARD -->
+  <div id="stage-card" class="fade-up" style="animation-delay:.14s">
+    <div id="stage-icon"></div>
+    <div id="stage-meta">
+      <div id="stage-meta-tag"></div>
+      <div id="stage-meta-title"></div>
+      <div id="stage-meta-sub"></div>
+    </div>
+    <div id="scene-counter"></div>
+  </div>
+
+  <!-- CHAT -->
+  <div id="chat" role="log" aria-live="polite" aria-label="Story dialogue"></div>
+
+  <!-- CHOICES -->
+  <div id="choices-wrap"></div>
+
+  <!-- FINISH -->
+  <div id="finish"></div>
+
+  <!-- GLOSSARY -->
+  <div id="glossary-wrap" class="fade-up" style="animation-delay:.18s">
+    <div class="gls-hdr" onclick="toggleGlossary()">
+      <div class="gls-hdr-left"><i class="ti ti-book-2"></i>PA glossary</div>
+      <i class="ti ti-chevron-down gls-toggle" id="gls-chevron"></i>
+    </div>
+    <div class="gls-grid" id="gls-grid"></div>
+  </div>
+
+</div>
+
+<script>
+/* ═══════════════════════════════════════
+   STATE
+═══════════════════════════════════════ */
+let currentScene = 0;
+let speedMult = 1;
+let autoPlay = false;
+let autoTimer = null;
+let visitedScenes = new Set();
+let lightMode = false;
+let glossaryOpen = false;
+let pendingTimers = [];
+
+const BASE_DELAY = 280;
+
+/* ═══════════════════════════════════════
+   SCENE DATA
+═══════════════════════════════════════ */
+const SCENES = [
+  {
+    tag:'Scene 1 · Clinical',
+    icon:'ti-stethoscope', iconBg:'rgba(99,102,241,0.15)', iconColor:'#818CF8',
+    title:'Doctor visit',
+    sub:'City Medical Center — Rahul meets Dr. Patel',
+    tl:'Doctor\nvisit',
+    messages:[
+      {t:'n', text:'Rahul, 34, has had painful, swollen joints for six months.'},
+      {t:'L', av:'👦', name:'Rahul', text:"I've had joint pain and morning stiffness for months. It's affecting my work and daily life."},
+      {t:'R', av:'👩‍⚕️', name:'Dr. Patel', text:"Let's review your labs and imaging carefully, Rahul. I want to get this diagnosis right."},
+      {t:'n', text:'Dr. Patel reviews bloodwork — RF elevated, anti-CCP positive, CRP markedly elevated.'},
+      {t:'R', av:'👩‍⚕️', name:'Dr. Patel', text:"Your results confirm <span class='has-tip'>Rheumatoid Arthritis<span class='tip-box'>An autoimmune disease where the immune system attacks synovial membranes lining the joints, causing inflammation, pain, and progressive joint damage.</span></span> — an autoimmune condition. Given your severity, I'm recommending Humira (adalimumab), a biologic that targets the TNF-alpha pathway driving your inflammation."},
+      {t:'L', av:'👦', name:'Rahul', text:"Will StarCare Health cover Humira? I've heard these biologics are extremely expensive."},
+      {t:'R', av:'👩‍⚕️', name:'Dr. Patel', text:"Most insurers — including <b>StarCare Health</b> (our illustrative example today) — require <span class='has-tip'>Prior Authorization<span class='tip-box'>A payer requirement that a provider obtain approval before prescribing certain medications or procedures. Without PA, the claim is typically denied.</span></span> before covering a biologic. My office submits directly to them — the pharmacy is not involved at this stage."},
+      {t:'info', style:'info', icon:'ti-info-circle', text:'<b>Humira (adalimumab)</b> is a TNF inhibitor biologic. Retail cost: $6,000–$8,000/month. Prior Authorization is required by virtually all commercial payers.'},
+    ],
+    choices:[
+      {icon:'ti-alert-triangle', title:'Ask about denial risk', desc:'What if StarCare says no?',
+       reply:{t:'R', av:'👩‍⚕️', name:'Dr. Patel', text:"Denials happen — but they're never final. If StarCare Health denies, we file an appeal with a <b>Letter of Medical Necessity</b>. My team navigates this regularly. We will make sure you receive the treatment you need."}},
+      {icon:'ti-file-text', title:'Ask about documentation', desc:'What info will you send?',
+       reply:{t:'R', av:'👩‍⚕️', name:'Dr. Patel', text:"We'll send your ICD-10 code (M05.79 — seropositive RA), lab results, imaging, and my clinical justification. A comprehensive upfront submission significantly increases first-pass approval odds."}}
+    ]
+  },
+  {
+    tag:'Scene 2 · Administration',
+    icon:'ti-send', iconBg:'rgba(167,139,250,0.15)', iconColor:'#A78BFA',
+    title:'PA submission',
+    sub:'Provider → PA Request → StarCare Health (payer only)',
+    tl:'PA\nsubmit',
+    messages:[
+      {t:'n', text:"Dr. Patel's office prepares and submits the Prior Authorization package."},
+      {t:'flow', nodes:["Dr. Patel's office","PA request","StarCare Health","Clinical review team"]},
+      {t:'R', av:'👩‍⚕️', name:'Dr. Patel', text:"We've submitted everything directly to StarCare Health. <b>Important:</b> the pharmacy is not part of this step. PA is provider-to-payer only."},
+      {t:'L', av:'👦', name:'Rahul', text:"What exactly did you send them?"},
+      {t:'R', av:'👩‍⚕️', name:'Dr. Patel', text:"Your diagnosis codes, lab results, imaging reports, physician notes explaining medical necessity, and prior treatment history. A thorough package reduces back-and-forth."},
+      {t:'L', av:'👦', name:'Rahul', text:"How long does StarCare Health take to decide?"},
+      {t:'R', av:'👩‍⚕️', name:'Dr. Patel', text:"Standard review: 3–14 business days. Federal law requires expedited review within <b>72 hours</b> for clinically urgent cases. Given your symptom severity, we're flagging yours as urgent."},
+      {t:'info', style:'warn', icon:'ti-clock', text:'<b>Once approved:</b> the PA reference number is saved permanently on file. You will not need to repeat this process for Humira during the approval period — typically 12 months.'},
+    ],
+    choices:[
+      {icon:'ti-bolt', title:'Request expedited review', desc:'My symptoms are worsening',
+       reply:{t:'R', av:'👩‍⚕️', name:'Dr. Patel', text:"Done — I've documented clinical urgency, noting ongoing joint inflammation with risk of irreversible cartilage and bone damage. StarCare Health must respond within 72 hours under federal expedited review rules."}},
+      {icon:'ti-id-badge', title:'Ask about the reference number', desc:'What exactly gets saved?',
+       reply:{t:'R', av:'👩‍⚕️', name:'Dr. Patel', text:"The approval includes: a PA reference number, approval date, approved drug name, and 12-month validity. Screenshot it and write it down — the pharmacy needs it, and it's your proof of coverage if any billing dispute arises."}}
+    ]
+  },
+  {
+    tag:'Scene 3 · Education',
+    icon:'ti-school', iconBg:'rgba(245,158,11,0.12)', iconColor:'#FBBF24',
+    title:'What is PA?',
+    sub:'Priya breaks down Prior Authorization in plain language',
+    tl:'PA 101',
+    messages:[
+      {t:'n', text:'Priya, a healthcare operations specialist, joins to explain the system.'},
+      {t:'R2', av:'👧', name:'Priya', text:"Think of Prior Authorization as a formal permission slip. Before StarCare Health pays for an expensive specialty drug, they need your doctor to prove it's <b>medically necessary</b> — not just clinically appropriate."},
+      {t:'L', av:'👦', name:'Rahul', text:"Why can't the doctor just decide what's right for me?"},
+      {t:'R2', av:'👧', name:'Priya', text:"PA exists to manage costs and enforce clinical protocols. But it creates real friction — especially for conditions like RA where starting the right drug quickly directly affects long-term disease progression."},
+      {t:'R2', av:'👧', name:'Priya', text:"<span class='has-tip'>Step therapy<span class='tip-box'>A payer policy requiring patients to try and fail cheaper, first-line medications before a more expensive drug is authorized. Also called 'fail-first.'</span></span> is a core part of PA. StarCare Health may require you to try methotrexate first — and <b>document failure</b> — before they'll approve Humira. This is the 'fail-first' policy."},
+      {t:'info', style:'warn', icon:'ti-chart-bar', text:'<b>AMA 2023 PA Survey:</b> PA causes treatment delays in the majority of cases. Many patients wait weeks or months before accessing approved therapy.'},
+      {t:'L', av:'👦', name:'Rahul', text:"So a delay in starting Humira could make my RA progress faster?"},
+      {t:'R2', av:'👧', name:'Priya', text:"Exactly. For aggressive RA, early intervention is critical. Joint damage from uncontrolled inflammation can be <b>irreversible</b>. Step therapy isn't just bureaucracy — the timing has direct, documented clinical consequences on disease progression."},
+    ],
+    choices:[
+      {icon:'ti-ladder', title:'Explain step therapy in practice', desc:'Walk me through fail-first',
+       reply:{t:'R2', av:'👧', name:'Priya', text:"StarCare's typical RA pathway: try methotrexate for 3 months → document failure or intolerance → try a second DMARD → only after documented failure do they approve Humira. Each step adds weeks or months of delay — and real inflammation damage."}},
+      {icon:'ti-gavel', title:'Is this system changing?', desc:'PA reform efforts',
+       reply:{t:'R2', av:'👧', name:'Priya', text:"Yes. The AMA's 'Fix Prior Auth' campaign has driven step therapy exception laws in 30+ states. CMS has proposed federal ePA (electronic PA) mandates for Medicare Advantage by 2026 — targeting turnaround under 24 hours."}}
+    ]
+  },
+  {
+    tag:'Scene 4 · Clinical Review',
+    icon:'ti-clipboard-check', iconBg:'rgba(20,184,166,0.12)', iconColor:'#2DD4BF',
+    title:'Insurance review',
+    sub:"What StarCare Health's clinical team evaluates",
+    tl:'Review',
+    messages:[
+      {t:'n', text:"StarCare Health's clinical reviewers open Rahul's PA submission."},
+      {t:'R2', av:'👧', name:'Priya', text:"Here are the four things StarCare Health checks — each can independently cause approval or denial."},
+      {t:'checklist', items:[
+        {icon:'ti-user-check', color:'#818CF8', label:'Eligibility', desc:"Is Rahul actively enrolled in a plan covering Humira? Even a single lapsed coverage day voids the entire PA and requires resubmission."},
+        {icon:'ti-file-text', color:'#A78BFA', label:'Clinical documentation', desc:'Did Dr. Patel provide all required labs, imaging, and signed physician notes? Any single missing document can trigger an automatic denial.'},
+        {icon:'ti-code', color:'#FBBF24', label:'ICD-10 diagnosis match', desc:'The submitted code (M05.79 — seropositive RA) must exactly match a payer-approved indication for Humira. A code mismatch is among the most common avoidable denial triggers.'},
+        {icon:'ti-stairs', color:'#F87171', label:'Step therapy history', desc:'Has Rahul tried and formally documented failure of at least one first-line DMARD? Without this, StarCare will almost certainly deny based on step therapy alone.'},
+      ]},
+      {t:'L', av:'👦', name:'Rahul', text:"What actually happens if any of those four things is missing?"},
+      {t:'R2', av:'👧', name:'Priya', text:"Denial — but the denial letter must state the <b>exact reason</b>. That specificity is your advantage: it tells you precisely what to fix for the appeal. Think of a denial as a diagnostic report, not a verdict."},
+    ],
+    choices:[
+      {icon:'ti-microscope', title:'What counts as adequate documentation?', desc:'Labs, notes, imaging?',
+       reply:{t:'R2', av:'👧', name:'Priya', text:"Minimum: signed physician note with RA diagnosis, ESR/CRP markers, RF and anti-CCP antibody results, joint imaging, and ideally a rheumatologist consult note. Some payers also require functional assessment scores like DAS28 or CDAI."}},
+      {icon:'ti-search', title:'Which ICD-10 codes matter most?', desc:'Exact codes for RA',
+       reply:{t:'R2', av:'👧', name:'Priya', text:"M05.xx = seropositive RA (most common). M06.xx = seronegative RA. The specific subcode identifies which joints are affected — and it must exactly match what's documented in Dr. Patel's clinical notes. Any mismatch is grounds for denial."}}
+    ]
+  },
+  {
+    tag:'Scene 5 · Denial',
+    icon:'ti-circle-x', iconBg:'rgba(244,63,94,0.12)', iconColor:'#F43F5E',
+    title:'Denial issued',
+    sub:'Missing step therapy documentation — a denial is not permanent',
+    tl:'Denial',
+    messages:[
+      {t:'n', text:"StarCare Health issues a formal denial letter to Dr. Patel's office."},
+      {t:'R2', av:'👧', name:'Priya', text:"Rahul, I have difficult news. StarCare Health has denied the PA for Humira."},
+      {t:'L', av:'👦', name:'Rahul', text:"Why? What did we miss?"},
+      {t:'info', style:'danger', icon:'ti-circle-x', text:'<b>Denial reason:</b> No documented step therapy with a conventional DMARD prior to requesting a biologic. StarCare Health requires proof of failure of at least one first-line treatment (e.g., methotrexate).'},
+      {t:'R2', av:'👧', name:'Priya', text:"This is the step therapy problem. Options: (1) try methotrexate and document failure, or (2) file an appeal arguing that step therapy is clinically inappropriate for Rahul's specific case — citing disease severity and risk of joint damage from delay."},
+      {t:'L', av:'👦', name:'Rahul', text:"Is this the end, or can we fight this decision?"},
+      {t:'R2', av:'👧', name:'Priya', text:"A denial is a <b>decision</b>, not a final verdict. You have a legal right to appeal. Appeals succeed when the medical record is complete and the Letter of Medical Necessity makes a compelling, evidence-based case."},
+      {t:'info', style:'warn', icon:'ti-clock', text:'<b>AMA 2023:</b> PA denials cost physician offices an average of <b>2+ staff hours</b> per case to resolve — covering documentation retrieval, coordination calls, and formal appeal filing.'},
+    ],
+    choices:[
+      {icon:'ti-ban', title:'Argue a step therapy exception', desc:'Methotrexate is contraindicated',
+       reply:{t:'R2', av:'👧', name:'Priya', text:"Step therapy exceptions are well-established. If Dr. Patel documents that methotrexate is contraindicated — due to liver conditions, pulmonary disease, or RA severity requiring immediate biologics — StarCare Health must evaluate it. Many state laws require exception decisions within 72 hours."}},
+      {icon:'ti-paperclip', title:'What documents do we need?', desc:'Start the appeal now',
+       reply:{t:'R2', av:'👧', name:'Priya', text:"Required: the denial letter, complete medical records, all lab results, imaging, a Letter of Medical Necessity from Dr. Patel citing ACR clinical guidelines, and peer-reviewed literature supporting early biologic therapy in aggressive RA. We build this package together."}}
+    ]
+  },
+  {
+    tag:'Scene 6 · Appeal',
+    icon:'ti-file-upload', iconBg:'rgba(245,158,11,0.12)', iconColor:'#FBBF24',
+    title:'Filing the appeal',
+    sub:'Assembling the case — Letter of Medical Necessity',
+    tl:'Appeal',
+    messages:[
+      {t:'n', text:"Dr. Patel's team assembles the formal appeal package."},
+      {t:'flow', nodes:['Denial letter','Medical records','LMN letter','ACR guidelines','Formal filing']},
+      {t:'R2', av:'👧', name:'Priya', text:"The <span class='has-tip'>Letter of Medical Necessity<span class='tip-box'>A formal letter from a physician to a payer explaining why a specific treatment is medically necessary for a specific patient — citing diagnosis, failed alternatives, and clinical evidence.</span></span> is the cornerstone of any biologic PA appeal. Dr. Patel writes directly to StarCare Health's medical director."},
+      {t:'L', av:'👦', name:'Rahul', text:"What makes a strong Letter of Medical Necessity?"},
+      {t:'checklist', items:[
+        {icon:'ti-activity', color:'#F87171', label:'Diagnosis severity', desc:'Documents active, progressive RA with quantified inflammation markers — DAS28 score, elevated CRP, positive RF and anti-CCP.'},
+        {icon:'ti-ban', color:'#FBBF24', label:'Contraindication to step therapy', desc:'Specifies why conventional DMARDs are clinically inappropriate or insufficient for this patient — not just a general statement.'},
+        {icon:'ti-heart', color:'#818CF8', label:'Expected clinical benefit', desc:'Cites ACR 2022 guidelines recommending biologic therapy for moderate-to-severe RA with poor prognostic indicators.'},
+        {icon:'ti-trending-up', color:'#F87171', label:'Risk of no treatment', desc:'Quantifies the risk of irreversible joint destruction and disability if biologic therapy is further delayed for this patient.'},
+      ]},
+      {t:'R2', av:'👧', name:'Priya', text:"StarCare Health has mandated response windows: <b>30 days</b> for standard appeals, <b>72 hours</b> for expedited. We're requesting expedited given documented symptom progression."},
+      {t:'info', style:'info', icon:'ti-info-circle', text:"If the internal appeal is denied, you have the right to an <b>external independent review (IRO)</b> — conducted by a third-party expert with no affiliation to StarCare Health. IRO decisions in your favor are binding on the insurer."},
+    ],
+    choices:[
+      {icon:'ti-book', title:'Which guidelines does Dr. Patel cite?', desc:'ACR clinical evidence',
+       reply:{t:'R2', av:'👧', name:'Priya', text:"ACR 2022 guidelines recommend biologic DMARDs for patients with moderate-to-severe RA uncontrolled by conventional therapy or with high disease activity and poor prognostic factors. Dr. Patel cites these with DOIs. Payers are legally required to consider peer-reviewed clinical evidence in appeal reviews."}},
+      {icon:'ti-pill', title:'Can Rahul get bridge therapy?', desc:'While awaiting the appeal',
+       reply:{t:'R2', av:'👧', name:'Priya', text:"Yes — Dr. Patel can prescribe a short corticosteroid course to control inflammation during the appeal window. Also, AbbVie's myAbbVie Assist program may cover Humira costs during the gap if Rahul qualifies by income. We can apply simultaneously with the appeal."}}
+    ]
+  },
+  {
+    tag:'Scene 7 · Approval',
+    icon:'ti-circle-check', iconBg:'rgba(16,185,129,0.12)', iconColor:'#10B981',
+    title:'PA approved',
+    sub:'Appeal succeeded — reference number issued, saved on file',
+    tl:'Approved',
+    messages:[
+      {t:'n', text:'14 days later — StarCare Health reviews the appeal and issues a decision.'},
+      {t:'info', style:'success', icon:'ti-circle-check', text:'<b>Appeal approved.</b> StarCare Health has authorized Humira (adalimumab) for Rahul Sharma. PA reference: <b>SCH-2024-RA-7741</b> · Valid 12 months from today.'},
+      {t:'R2', av:'👧', name:'Priya', text:"Excellent news, Rahul. The appeal succeeded. Your PA reference number is now permanently on file with StarCare Health and has been electronically transmitted to your specialty pharmacy."},
+      {t:'L', av:'👦', name:'Rahul', text:"What do I actually do with the reference number?"},
+      {t:'R2', av:'👧', name:'Priya', text:"It's your proof of authorization. If the pharmacy ever gets a coverage error at the counter, give them <b>SCH-2024-RA-7741</b> and they verify directly with StarCare Health. Screenshot it, write it down — treat it like a policy number."},
+      {t:'flow', nodes:['PA approved','Ref # SCH-2024-RA-7741','Saved on file','Pharmacy notified','Rx ready']},
+      {t:'L', av:'👦', name:'Rahul', text:"Will I have to go through all of this again next year?"},
+      {t:'R2', av:'👧', name:'Priya', text:"Most plans require annual PA renewal for biologics. But with documented clinical response — improved labs, symptom scores — renewal is usually much faster. Start 60 days before expiry to avoid any gap in coverage."},
+      {t:'info', style:'success', icon:'ti-check', text:'<b>No repeat PA needed</b> for Humira during this 12-month approval period. The reference number SCH-2024-RA-7741 covers all fills at your specialty pharmacy.'},
+    ],
+    choices:[
+      {icon:'ti-syringe', title:'When can Rahul start Humira?', desc:'First injection timeline',
+       reply:{t:'R2', av:'👧', name:'Priya', text:"The specialty pharmacy receives the PA confirmation within 1–2 business days, then ships the medication cold-packaged. Typically 5–7 days total. Your first injection will be done with a nurse educator present to train you on self-injection technique and manage any initial reactions."}},
+      {icon:'ti-refresh', title:'How does PA renewal work?', desc:"Next year's process",
+       reply:{t:'R2', av:'👧', name:'Priya', text:"We document your clinical response at 6 months: labs, DAS28 score, physician note confirming continued need. If Humira is working well, renewal is usually fast-tracked — payers prefer continuity for stable patients. I'll calendar a reminder 60 days before expiry."}}
+    ]
+  },
+  {
+    tag:'Scene 8 · Reflection',
+    icon:'ti-bulb', iconBg:'rgba(99,102,241,0.12)', iconColor:'#818CF8',
+    title:'Key takeaways',
+    sub:'Patient perspective and system-level insights',
+    tl:'Takeaways',
+    messages:[
+      {t:'n', text:"Reflecting on Rahul's full Prior Authorization journey — from diagnosis to approval."},
+      {t:'L', av:'👦', name:'Rahul', text:"I had no idea getting one medication approved could take this long and require a full appeal. I almost gave up after the denial letter."},
+      {t:'R2', av:'👧', name:'Priya', text:"Most patients do give up — and that outcome benefits the payer financially. But understanding how the system works gives you real leverage. A denial is a specific document with a specific reason. That reason is exactly your appeal roadmap."},
+      {t:'L', av:'👦', name:'Rahul', text:"What's the single most important thing a patient should know going in?"},
+      {t:'R2', av:'👧', name:'Priya', text:"Know your appeal rights. A denial is <b>never</b> a final answer. Get the PA reference number. Follow up with the insurer after 5 business days. And you can formally request that your doctor's office file an appeal on your behalf — it's your right."},
+      {t:'R2', av:'👧', name:'Priya', text:"From the system side: health plans track <b>denial rate</b>, <b>appeal overturn rate</b>, and <b>average resolution time</b> as quality metrics. A high overturn rate signals that initial PA criteria are too restrictive — it's a system design flaw, not just administrative friction."},
+      {t:'info', style:'info', icon:'ti-trending-up', text:'<b>Electronic PA (ePA)</b> adoption is accelerating. CMS has proposed federal mandates for Medicare Advantage by 2026, targeting turnaround from 14+ days to under 24 hours. Real-time PA decisions are already available for some drug classes.'},
+    ],
+    choices:[
+      {icon:'ti-chart-dots', title:'How do payers measure PA quality?', desc:'Key metrics tracked',
+       reply:{t:'R2', av:'👧', name:'Priya', text:"Payers track: initial denial rate (% denied first pass), appeal overturn rate (% of denials successfully appealed — a high rate is a red flag for over-restrictive criteria), and time-to-decision. CMS increasingly requires public reporting of these metrics for Medicare Advantage plans."}},
+      {icon:'ti-building-community', title:'What patient advocacy exists?', desc:'PA reform resources',
+       reply:{t:'R2', av:'👧', name:'Priya', text:"The AMA's 'Fix Prior Auth' campaign; the Arthritis Foundation's PA rights guides by state; state insurance commissioners accept formal complaints about wrongful denials. The Patient Advocate Foundation also offers free case management for complex PA situations."}}
+    ]
+  }
+];
+
+/* ═══════════════════════════════════════
+   GLOSSARY DATA
+═══════════════════════════════════════ */
+const GLOSSARY = [
+  {term:'Prior Authorization (PA)', def:'Payer requirement that a provider obtain approval before prescribing a drug or procedure. Without PA, the claim is denied.'},
+  {term:'Step Therapy', def:'A "fail-first" policy requiring patients to try cheaper drugs before a more expensive option is authorized.'},
+  {term:'ICD-10 Code', def:'A standardized diagnosis code used by providers and payers to classify diseases. Must exactly match payer-approved indications.'},
+  {term:'Letter of Medical Necessity', def:'A physician letter to a payer justifying a specific treatment as medically necessary for a specific patient.'},
+  {term:'Biologic', def:'A complex drug derived from biological sources (proteins, cells). Used for autoimmune conditions like RA. Typically $5,000–$20,000/month.'},
+  {term:'Appeal', def:'A formal request to overturn a payer\'s denial decision, supported by medical documentation and clinical evidence.'},
+  {term:'IRO (Independent Review Org)', def:'A third-party organization that reviews denied claims. IRO decisions in the patient\'s favor are binding on the insurer.'},
+  {term:'ePA (Electronic PA)', def:'Digital PA submission between provider and payer systems, dramatically reducing turnaround from 14+ days to hours.'},
+];
+
+/* ═══════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════ */
+const $=id=>document.getElementById(id);
+
+function delay(ms){ return new Promise(r=>{ const t=setTimeout(r, ms/speedMult); pendingTimers.push(t); }); }
+
+function clearPending(){ pendingTimers.forEach(t=>clearTimeout(t)); pendingTimers=[]; }
+
+function addAnim(el, cls, delayMs=0){
+  el.style.animationDelay = delayMs+'ms';
+  el.classList.add(cls);
+}
+
+/* ═══════════════════════════════════════
+   BUBBLE BUILDERS
+═══════════════════════════════════════ */
+function makeNarrator(text){
+  const d=document.createElement('div');
+  d.className='narrator-row';
+  const l=document.createElement('div'); l.className='narrator-line';
+  const t=document.createElement('div'); t.className='narrator-text'; t.textContent=text;
+  const r=document.createElement('div'); r.className='narrator-line';
+  d.appendChild(l); d.appendChild(t); d.appendChild(r);
+  return d;
+}
+
+function makeBubble(m){
+  const isRight = m.t==='R'||m.t==='R2';
+  const row=document.createElement('div');
+  row.className='msg-row'+(isRight?' right':'');
+
+  const avWrap=document.createElement('div'); avWrap.className='av-wrap';
+  const av=document.createElement('div'); av.className='avatar'; av.textContent=m.av;
+  const nm=document.createElement('div'); nm.className='av-name'; nm.textContent=m.name||'';
+  avWrap.appendChild(av); avWrap.appendChild(nm);
+
+  const bubWrap=document.createElement('div'); bubWrap.className='bub-wrap';
+  const bub=document.createElement('div');
+  bub.className='bub '+m.t;
+  bub.innerHTML=m.text;
+  bubWrap.appendChild(bub);
+
+  row.appendChild(avWrap); row.appendChild(bubWrap);
+  addAnim(row, isRight?'slide-left':'slide-right');
+  return row;
+}
+
+function makeTyping(){
+  const row=document.createElement('div');
+  row.className='msg-row';
+  const av=document.createElement('div'); av.className='avatar'; av.textContent='⏳';
+  const ind=document.createElement('div'); ind.className='typing-indicator';
+  [0,1,2].forEach(()=>{
+    const d=document.createElement('div'); d.className='typing-dot'; ind.appendChild(d);
+  });
+  row.appendChild(av); row.appendChild(ind);
+  return row;
+}
+
+function makeInfoCard(m){
+  const d=document.createElement('div');
+  d.className='info-card '+m.style;
+  const ico=document.createElement('i'); ico.className='ti '+m.icon;
+  d.appendChild(ico);
+  const sp=document.createElement('span'); sp.innerHTML=m.text;
+  d.appendChild(sp);
+  addAnim(d,'fade-up');
+  return d;
+}
+
+function makeFlow(nodes){
+  const d=document.createElement('div'); d.className='flow-strip';
+  nodes.forEach((n,i)=>{
+    const nd=document.createElement('span'); nd.className='flow-node'; nd.textContent=n;
+    d.appendChild(nd);
+    if(i<nodes.length-1){
+      const arr=document.createElement('span'); arr.className='flow-arrow'; arr.textContent='→';
+      d.appendChild(arr);
+    }
+  });
+  addAnim(d,'fade-up');
+  return d;
+}
+
+function makeChecklist(items){
+  const wrap=document.createElement('div'); wrap.className='checklist';
+  items.forEach((item,i)=>{
+    const row=document.createElement('div'); row.className='cl-row';
+    const ico=document.createElement('i');
+    ico.className='ti '+item.icon+' cl-icon';
+    ico.style.color=item.color;
+    const txt=document.createElement('div');
+    const lbl=document.createElement('div'); lbl.className='cl-label'; lbl.textContent=item.label;
+    const desc=document.createElement('div'); desc.className='cl-desc'; desc.textContent=item.desc;
+    txt.appendChild(lbl); txt.appendChild(desc);
+    row.appendChild(ico); row.appendChild(txt);
+    wrap.appendChild(row);
+  });
+  addAnim(wrap,'fade-up');
+  return wrap;
+}
+
+/* ═══════════════════════════════════════
+   RENDER MESSAGES
+═══════════════════════════════════════ */
+async function renderMessages(messages){
+  const chat=$('chat');
+  for(let i=0;i<messages.length;i++){
+    const m=messages[i];
+    if(speedMult>0) await delay(BASE_DELAY);
+
+    let node;
+    if(m.t==='n') node=makeNarrator(m.text);
+    else if(m.t==='L'||m.t==='R'||m.t==='R2'){
+      if(speedMult>0){
+        const typ=makeTyping(); chat.appendChild(typ); chat.scrollTop=chat.scrollHeight;
+        await delay(520);
+        chat.removeChild(typ);
+      }
+      node=makeBubble(m);
+    }
+    else if(m.t==='info') node=makeInfoCard(m);
+    else if(m.t==='flow') node=makeFlow(m.nodes);
+    else if(m.t==='checklist') node=makeChecklist(m.items);
+
+    if(node){ chat.appendChild(node); chat.scrollTop=chat.scrollHeight; }
+  }
+}
+
+/* ═══════════════════════════════════════
+   CHOICES
+═══════════════════════════════════════ */
+function renderChoices(choices, sceneIdx){
+  const area=$('choices-wrap');
+  area.innerHTML='';
+
+  const hdr=document.createElement('div');
+  hdr.className='choices-hdr'; hdr.textContent='Choose your path';
+  area.appendChild(hdr);
+
+  const grid=document.createElement('div'); grid.className='choices-grid';
+
+  choices.forEach(c=>{
+    const btn=document.createElement('div');
+    btn.className='choice-btn pop-in';
+    btn.setAttribute('role','button');
+    btn.setAttribute('tabindex','0');
+
+    const ic=document.createElement('i'); ic.className='ti '+c.icon+' c-icon';
+    const tt=document.createElement('span'); tt.className='c-title'; tt.textContent=c.title;
+    const dd=document.createElement('span'); dd.className='c-desc'; dd.textContent=c.desc;
+    btn.appendChild(ic); btn.appendChild(tt); btn.appendChild(dd);
+
+    const pick=async()=>{
+      grid.querySelectorAll('.choice-btn').forEach(b=>{
+        b.style.opacity='0.35'; b.style.pointerEvents='none';
+      });
+      btn.style.opacity='1'; btn.classList.add('chosen');
+      btn.style.pointerEvents='none';
+
+      const chat=$('chat');
+      if(speedMult>0){ await delay(180); }
+      if(speedMult>0){
+        const typ=makeTyping(); chat.appendChild(typ); chat.scrollTop=chat.scrollHeight;
+        await delay(600);
+        chat.removeChild(typ);
+      }
+      const node=makeBubble(c.reply);
+      chat.appendChild(node);
+      chat.scrollTop=chat.scrollHeight;
+
+      await delay(700);
+      area.innerHTML='';
+
+      if(sceneIdx<SCENES.length-1){
+        const nb=document.createElement('button'); nb.className='next-btn';
+        nb.innerHTML='<i class="ti ti-arrow-right"></i> Continue to next scene';
+        nb.addEventListener('click',()=>loadScene(sceneIdx+1));
+        area.appendChild(nb);
+        if(autoPlay){ autoTimer=setTimeout(()=>loadScene(sceneIdx+1), 2200/speedMult); }
+      } else {
+        showFinish();
+      }
+    };
+
+    btn.addEventListener('click',pick);
+    btn.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' ')pick(); });
+    grid.appendChild(btn);
+  });
+
+  area.appendChild(grid);
+}
+
+/* ═══════════════════════════════════════
+   TIMELINE + PROGRESS
+═══════════════════════════════════════ */
+function buildTimeline(){
+  const tl=$('tl-wrap');
+  tl.innerHTML='';
+  SCENES.forEach((s,i)=>{
+    const item=document.createElement('div');
+    item.className='tl-item'+(i<currentScene?' done':i===currentScene?' active':'');
+
+    const dot=document.createElement('div'); dot.className='tl-dot';
+    if(i<currentScene){
+      const chk=document.createElement('i'); chk.className='ti ti-check check-pop';
+      chk.style.fontSize='11px'; dot.appendChild(chk);
+    } else { dot.textContent=i+1; }
+
+    const lbl=document.createElement('div'); lbl.className='tl-lbl';
+    lbl.textContent=s.tl.replace('\\n','\n');
+
+    item.appendChild(dot); item.appendChild(lbl);
+    tl.appendChild(item);
+  });
+
+  const pct=Math.round((currentScene/SCENES.length)*100);
+  $('progress-fill').style.width=pct+'%';
+  $('progress-pct').textContent=pct+'%';
+  $('progress-label').textContent=currentScene===0?'Starting journey…':
+    currentScene===SCENES.length?'Journey complete!':
+    `Scene ${currentScene} of ${SCENES.length} complete`;
+}
+
+function buildSceneJump(){
+  const wrap=$('scene-jump-wrap');
+  wrap.innerHTML='';
+  const lbl=document.createElement('span');
+  lbl.style.cssText='font-size:10px;color:var(--text3);margin-right:2px;font-weight:600;letter-spacing:.06em;text-transform:uppercase';
+  lbl.textContent='Jump:';
+  wrap.appendChild(lbl);
+  SCENES.forEach((s,i)=>{
+    const btn=document.createElement('button');
+    btn.className='sj-btn'+(i===currentScene?' current':visitedScenes.has(i)?' visited':'');
+    btn.textContent=s.tl.replace(/\n/g,' ');
+    btn.title='Go to: '+s.title;
+    if(visitedScenes.has(i)||i===currentScene){
+      btn.addEventListener('click',()=>{ clearPending(); clearTimeout(autoTimer); loadScene(i); });
+    } else {
+      btn.style.opacity='0.4'; btn.style.cursor='default';
+    }
+    wrap.appendChild(btn);
+  });
+}
+
+/* ═══════════════════════════════════════
+   STAGE HEADER
+═══════════════════════════════════════ */
+function buildStageHeader(s){
+  $('stage-meta-tag').textContent=s.tag;
+  $('stage-meta-title').textContent=s.title;
+  $('stage-meta-sub').textContent=s.sub;
+  $('scene-counter').textContent=`${currentScene+1} / ${SCENES.length}`;
+  const ico=$('stage-icon');
+  ico.style.background=s.iconBg;
+  ico.innerHTML=`<i class="ti ${s.icon}" style="font-size:20px;color:${s.iconColor}"></i>`;
+}
+
+/* ═══════════════════════════════════════
+   FINISH SCREEN
+═══════════════════════════════════════ */
+function showFinish(){
+  const fin=$('finish');
+  fin.style.display='block';
+  fin.innerHTML='';
+
+  const banner=document.createElement('div'); banner.className='finish-banner';
+  banner.innerHTML='<i class="ti ti-circle-check"></i><div><h3>Simulation complete</h3><p>Rahul\'s Humira approved · PA ref: SCH-2024-RA-7741 · StarCare Health</p></div>';
+  fin.appendChild(banner);
+
+  const mrow=document.createElement('div'); mrow.className='metrics-row';
+  [['14 days','Total resolution time'],['1 denial','Initial review result'],['1 appeal','Rounds filed']].forEach(([v,l])=>{
+    const mc=document.createElement('div'); mc.className='metric-card';
+    mc.innerHTML=`<div class="metric-val">${v}</div><div class="metric-lbl">${l}</div>`;
+    mrow.appendChild(mc);
+  });
+  fin.appendChild(mrow);
+
+  const tg=document.createElement('div'); tg.className='tk-grid';
+  const data=[
+    {icon:'ti-user', hdr:'Patient perspective', items:['PA required for most specialty biologics','A denial is never final — appeal it','Get and save your PA reference number','Step therapy can delay the right drug by months','Know the denial reason — it\'s your appeal roadmap','You can request the insurer expedite your review']},
+    {icon:'ti-building-hospital', hdr:'System perspective', items:['Payers track denial rate, overturn rate, resolution time','High overturn rates signal over-restrictive PA criteria','AMA 2023: PA delays affect majority of patients','Each denial costs offices 2+ staff hours to resolve','ePA mandates aim to cut turnaround to under 24 hrs','IRO decisions in patient favor are binding on insurer']},
+  ];
+  data.forEach(d=>{
+    const card=document.createElement('div'); card.className='tk-card';
+    const hdr=document.createElement('div'); hdr.className='tk-hdr';
+    hdr.innerHTML=`<i class="ti ${d.icon}"></i>${d.hdr}`;
+    const ul=document.createElement('ul');
+    d.items.forEach(item=>{
+      const li=document.createElement('li'); li.textContent=item; ul.appendChild(li);
+    });
+    card.appendChild(hdr); card.appendChild(ul);
+    tg.appendChild(card);
+  });
+  fin.appendChild(tg);
+
+  const rb=document.createElement('button'); rb.className='restart-btn';
+  rb.innerHTML='<i class="ti ti-refresh"></i> Restart simulation';
+  rb.addEventListener('click',()=>{ fin.style.display='none'; fin.innerHTML=''; visitedScenes.clear(); loadScene(0); });
+  fin.appendChild(rb);
+  fin.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+/* ═══════════════════════════════════════
+   GLOSSARY
+═══════════════════════════════════════ */
+function buildGlossary(){
+  const grid=$('gls-grid');
+  grid.innerHTML='';
+  GLOSSARY.forEach(g=>{
+    const card=document.createElement('div'); card.className='gls-card';
+    const term=document.createElement('div'); term.className='gls-term'; term.textContent=g.term;
+    const def=document.createElement('div'); def.className='gls-def'; def.textContent=g.def;
+    card.appendChild(term); card.appendChild(def);
+    grid.appendChild(card);
+  });
+}
+function toggleGlossary(){
+  glossaryOpen=!glossaryOpen;
+  $('gls-grid').style.display=glossaryOpen?'grid':'none';
+  $('gls-chevron').style.transform=glossaryOpen?'rotate(180deg)':'';
+}
+
+/* ═══════════════════════════════════════
+   SPEED + AUTOPLAY + MODE
+═══════════════════════════════════════ */
+function setSpeed(s){
+  speedMult=s||999;
+  document.querySelectorAll('.speed-btn').forEach((b,i)=>{
+    b.classList.toggle('active',[0.5,1,2,0][i]===s);
+  });
+}
+function toggleAuto(){
+  autoPlay=!autoPlay;
+  const btn=$('auto-play-btn');
+  const ico=$('auto-icon');
+  if(autoPlay){ ico.className='ti ti-player-pause'; btn.style.color='var(--amber)'; btn.style.borderColor='var(--amber-border)'; btn.style.background='var(--amber-bg)'; }
+  else { ico.className='ti ti-player-play'; btn.style.color=''; btn.style.borderColor=''; btn.style.background=''; clearTimeout(autoTimer); }
+}
+function toggleMode(){
+  lightMode=!lightMode;
+  document.body.classList.toggle('light',lightMode);
+  $('mode-icon').className=lightMode?'ti ti-moon':'ti ti-sun';
+}
+
+/* ═══════════════════════════════════════
+   MAIN LOAD
+═══════════════════════════════════════ */
+async function loadScene(idx){
+  currentScene=idx;
+  visitedScenes.add(idx);
+  const s=SCENES[idx];
+
+  $('chat').innerHTML='';
+  $('choices-wrap').innerHTML='';
+  $('finish').style.display='none';
+  $('finish').innerHTML='';
+
+  buildTimeline();
+  buildSceneJump();
+  buildStageHeader(s);
+
+  await renderMessages(s.messages);
+  renderChoices(s.choices, idx);
+}
+
+/* ─── INIT ─── */
+buildGlossary();
+loadScene(0);
+</script>
+</body>
+</html>
