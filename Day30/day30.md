@@ -23,34 +23,7 @@
 - **Chain Visualization** — icons for each node
 - **Strengths & Weaknesses** analysis
 - **Biggest Risk** identification
-- **Top 3 Practical Improvements**
-
----
-
-## 📸 Screenshots
-
-### Welcome Screen
-![Welcome Screen](./screenshots/Screenshot%202026-06-30%20080654.png)
-
-### Company Generator
-![Company Card](./screenshots/Screenshot%202026-06-30%20080806.png)
-
-### Supplier Decision Step
-![Supplier Step](./screenshots/Screenshot%202026-06-30%20080840.png)
-
-### Factory Location Step
-![Factory Step](./screenshots/Screenshot%202026-06-30%20080905.png)
-
-### Live Metrics Update
-![Live Metrics](./screenshots/Screenshot%202026-06-30%20080930.png)
-
-### Final Dashboard
-![Dashboard](./screenshots/Screenshot%202026-06-30%20081031.png)
-
-### Results Score
-![Score](./screenshots/Screenshot%202026-06-30%20080654.png)
-
----
+- **Top 3 Practical Improvements*
 
 ## 🧠 Key Learnings
 
