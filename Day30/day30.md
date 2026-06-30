@@ -30,7 +30,7 @@
 ## 📸 Screenshots
 
 ### Welcome Screen
-![Welcome Screen](./screenshots/Screenshot%202026-06-30%20080654.png)
+![Welcome Screen] (./screenshots/Screenshot%202026-06-30%20081112.png)(./screenshots/Screenshot%202026-06-30%20080654.png)
 
 ### Company Generator
 ![Company Card](./screenshots/Screenshot%202026-06-30%20080806.png)
@@ -48,7 +48,7 @@
 ![Dashboard](./screenshots/Screenshot%202026-06-30%20081031.png)
 
 ### Results Score
-![Score](./screenshots/Screenshot%202026-06-30%20081112.png)
+![Score](./screenshots/Screenshot%202026-06-30%20080654.png)
 
 ---
 
