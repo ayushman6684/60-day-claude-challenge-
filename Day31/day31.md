@@ -12,16 +12,16 @@ Protected, and Score — all within a 3-minute timed shift.
 Open `ai-supply-chain-control-tower.html` directly in any browser —
 no server or dependencies required.
 
-## Screenshots
+## Screenshots    (./Screenshot%202026-07-01%20095931.png)
 
 ### Start Screen
-![Start Screen](./Screenshot%202026-07-01%20095931.png)
+![Start Screen](./Screenshot%202026-07-01%20100216.png)
 
 ### Active Gameplay
 ![Gameplay](./Screenshot%202026-07-01%20100149.png)
 
 ### Results Screen
-![Results](./Screenshot%202026-07-01%20100216.png)
+![Results](./Screenshot%202026-07-01%20095931.png)
 
 ## Key Learnings
 - Built a full game loop (spawn → decide → resolve → score) entirely
