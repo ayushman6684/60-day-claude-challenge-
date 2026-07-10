@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumina — Your Concept Tutor</title>
+<style>
+  :root{
+    --ink-950:#0d1220;
+    --ink-900:#131a2c;
+    --ink-850:#182140;
+    --ink-800:#1d2748;
+    --ink-700:#293458;
+    --paper:#e9ecf3;
+    --paper-dim:#aab2c8;
+    --paper-faint:#7883a3;
+    --brass:#d8a353;
+    --brass-soft:#e8c98a;
+    --brass-dim:#8a6a3a;
+    --sage:#6fa98b;
+    --rose:#c9705f;
+    --radius-lg:18px;
+    --radius-md:12px;
+    --radius-sm:8px;
+    --serif:"Iowan Old Style","Palatino Linotype","Book Antiqua",Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    --mono:"SF Mono",SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:var(--sans);
+    background:
+      radial-gradient(1200px 500px at 20% -10%, rgba(216,163,83,0.08), transparent 60%),
+      var(--ink-950);
+    color:var(--paper);
+    overflow:hidden;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important;}
+  }
+
+  /* ============ APP SHELL ============ */
+  .app{
+    display:grid;
+    grid-template-columns:280px 1fr;
+    height:100vh;
+    width:100vw;
+  }
+
+  /* ============ SIDEBAR / DESK ============ */
+  .desk{
+    background:linear-gradient(180deg, var(--ink-900), var(--ink-850));
+    border-right:1px solid rgba(216,163,83,0.12);
+    display:flex;
+    flex-direction:column;
+    padding:22px 18px;
+    gap:22px;
+    overflow-y:auto;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding-bottom:4px;
+  }
+  .brand-mark{
+    width:34px;height:34px;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, var(--brass-soft), var(--brass) 55%, var(--brass-dim) 100%);
+    box-shadow:0 0 18px rgba(216,163,83,0.45);
+    flex-shrink:0;
+    position:relative;
+  }
+  .brand-mark::after{
+    content:"";
+    position:absolute;
+    inset:8px;
+    border-radius:50%;
+    background:var(--ink-900);
+    opacity:0.15;
+  }
+  .brand-name{
+    font-family:var(--serif);
+    font-size:1.28rem;
+    letter-spacing:0.02em;
+    font-weight:600;
+    color:var(--paper);
+  }
+  .brand-sub{
+    font-size:0.68rem;
+    color:var(--paper-faint);
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    margin-top:-2px;
+  }
+
+  .desk-section{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .desk-label{
+    font-size:0.68rem;
+    text-transform:uppercase;
+    letter-spacing:0.1em;
+    color:var(--paper-faint);
+    font-weight:600;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .desk-label::before{
+    content:"";
+    width:10px;height:1px;
+    background:var(--brass-dim);
+  }
+
+  .shelf{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .book-chip{
+    text-align:left;
+    background:var(--ink-800);
+    border:1px solid rgba(216,163,83,0.1);
+    border-left:3px solid var(--brass-dim);
+    color:var(--paper-dim);
+    font-family:var(--sans);
+    font-size:0.83rem;
+    padding:9px 12px;
+    border-radius:0 var(--radius-sm) var(--radius-sm) 0;
+    cursor:pointer;
+    transition:all 0.18s ease;
+  }
+  .book-chip:hover{
+    border-left-color:var(--brass);
+    background:var(--ink-700);
+    color:var(--paper);
+    transform:translateX(3px);
+  }
+
+  .desk-btn{
+    background:transparent;
+    border:1px solid rgba(233,236,243,0.15);
+    color:var(--paper-dim);
+    font-family:var(--sans);
+    font-size:0.8rem;
+    padding:9px 12px;
+    border-radius:var(--radius-sm);
+    cursor:pointer;
+    transition:all 0.18s ease;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .desk-btn:hover{
+    border-color:var(--brass);
+    color:var(--brass-soft);
+  }
+
+  .key-status{
+    font-size:0.72rem;
+    padding:8px 10px;
+    border-radius:var(--radius-sm);
+    background:rgba(111,169,139,0.1);
+    color:var(--sage);
+    border:1px solid rgba(111,169,139,0.25);
+    display:none;
+  }
+  .key-status.show{display:block;}
+  .key-status.missing{
+    background:rgba(201,112,95,0.1);
+    color:var(--rose);
+    border-color:rgba(201,112,95,0.3);
+  }
+
+  .desk-footer{
+    margin-top:auto;
+    font-size:0.7rem;
+    color:var(--paper-faint);
+    line-height:1.5;
+    padding-top:12px;
+    border-top:1px solid rgba(233,236,243,0.08);
+  }
+
+  /* ============ MAIN / NOTEBOOK ============ */
+  .notebook{
+    display:flex;
+    flex-direction:column;
+    height:100vh;
+    position:relative;
+    overflow:hidden;
+  }
+
+  .lamp-glow{
+    position:absolute;
+    top:-180px;
+    left:50%;
+    transform:translateX(-50%);
+    width:900px;
+    height:400px;
+    background:radial-gradient(ellipse at center, rgba(216,163,83,0.16), transparent 70%);
+    pointer-events:none;
+    animation:glowPulse 6s ease-in-out infinite;
+  }
+  @keyframes glowPulse{
+    0%,100%{opacity:0.7;}
+    50%{opacity:1;}
+  }
+
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:16px 28px;
+    border-bottom:1px solid rgba(233,236,243,0.07);
+    z-index:2;
+    position:relative;
+  }
+  .topbar-title{
+    font-family:var(--serif);
+    font-size:1rem;
+    color:var(--paper);
+  }
+  .topbar-title span{
+    color:var(--brass-soft);
+  }
+  .topbar-actions{
+    display:flex;
+    gap:8px;
+  }
+  .icon-btn{
+    background:transparent;
+    border:1px solid rgba(233,236,243,0.12);
+    color:var(--paper-dim);
+    width:32px;height:32px;
+    border-radius:var(--radius-sm);
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:all 0.18s ease;
+    font-size:0.9rem;
+  }
+  .icon-btn:hover{border-color:var(--brass); color:var(--brass-soft);}
+
+  .menu-toggle{
+    display:none;
+    background:transparent;
+    border:none;
+    color:var(--paper);
+    font-size:1.3rem;
+    cursor:pointer;
+  }
+
+  .chat-scroll{
+    flex:1;
+    overflow-y:auto;
+    padding:24px 0 12px;
+    z-index:1;
+    position:relative;
+  }
+  .chat-inner{
+    max-width:760px;
+    margin:0 auto;
+    padding:0 28px 20px;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+  }
+
+  /* ---- Empty state ---- */
+  .empty-state{
+    max-width:640px;
+    margin:40px auto;
+    padding:0 28px;
+    text-align:center;
+  }
+  .empty-title{
+    font-family:var(--serif);
+    font-size:1.9rem;
+    color:var(--paper);
+    margin-bottom:8px;
+  }
+  .empty-sub{
+    color:var(--paper-faint);
+    font-size:0.95rem;
+    margin-bottom:28px;
+    line-height:1.6;
+  }
+  .prompt-cards{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+  .prompt-card{
+    text-align:left;
+    background:var(--ink-850);
+    border:1px solid rgba(216,163,83,0.14);
+    border-radius:var(--radius-md);
+    padding:14px 16px;
+    cursor:pointer;
+    color:var(--paper-dim);
+    font-size:0.85rem;
+    line-height:1.5;
+    transition:all 0.2s ease;
+    position:relative;
+    overflow:hidden;
+  }
+  .prompt-card::before{
+    content:"";
+    position:absolute;
+    top:0;left:0;
+    width:3px;height:100%;
+    background:var(--brass-dim);
+    transition:background 0.2s ease;
+  }
+  .prompt-card:hover{
+    transform:translateY(-2px);
+    border-color:rgba(216,163,83,0.35);
+    color:var(--paper);
+    box-shadow:0 8px 24px rgba(0,0,0,0.25);
+  }
+  .prompt-card:hover::before{background:var(--brass);}
+  .prompt-card b{color:var(--brass-soft); font-weight:600;}
+
+  /* ---- Message cards ---- */
+  .msg{
+    display:flex;
+    gap:12px;
+    animation:riseIn 0.35s ease both;
+  }
+  @keyframes riseIn{
+    from{opacity:0; transform:translateY(10px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+  .msg.user{ flex-direction:row-reverse; }
+
+  .avatar{
+    width:32px;height:32px;
+    border-radius:50%;
+    flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    font-size:0.85rem;
+    margin-top:2px;
+  }
+  .avatar.tutor{
+    background:radial-gradient(circle at 35% 30%, var(--brass-soft), var(--brass) 60%, var(--brass-dim));
+    color:var(--ink-950);
+    font-weight:700;
+    box-shadow:0 0 12px rgba(216,163,83,0.3);
+  }
+  .avatar.user{
+    background:var(--ink-700);
+    color:var(--paper-dim);
+    border:1px solid rgba(233,236,243,0.15);
+  }
+
+  .bubble-wrap{
+    max-width:80%;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .msg.user .bubble-wrap{ align-items:flex-end; }
+
+  .tag-pin{
+    font-size:0.62rem;
+    text-transform:uppercase;
+    letter-spacing:0.09em;
+    color:var(--brass-soft);
+    font-weight:700;
+    padding-left:2px;
+  }
+
+  .bubble{
+    padding:13px 16px;
+    border-radius:var(--radius-md);
+    line-height:1.65;
+    font-size:0.92rem;
+    position:relative;
+  }
+  .bubble.tutor{
+    background:var(--ink-850);
+    border:1px solid rgba(216,163,83,0.14);
+    border-top-left-radius:4px;
+    color:var(--paper);
+  }
+  .bubble.tutor::before{
+    content:"";
+    position:absolute;
+    top:0; right:0;
+    width:0; height:0;
+    border-style:solid;
+    border-width:0 14px 14px 0;
+    border-color:transparent rgba(216,163,83,0.16) transparent transparent;
+  }
+  .bubble.user{
+    background:linear-gradient(135deg, var(--ink-700), var(--ink-800));
+    border:1px solid rgba(233,236,243,0.1);
+    border-top-right-radius:4px;
+    color:var(--paper);
+  }
+  .bubble.error{
+    background:rgba(201,112,95,0.08);
+    border:1px solid rgba(201,112,95,0.35);
+    color:#eab8ac;
+  }
+
+  .bubble p{ margin:0 0 10px; }
+  .bubble p:last-child{ margin-bottom:0; }
+  .bubble ul, .bubble ol{ margin:6px 0 12px; padding-left:20px; }
+  .bubble li{ margin-bottom:5px; }
+  .bubble strong{ color:var(--brass-soft); font-weight:700; }
+  .bubble code{
+    background:rgba(216,163,83,0.12);
+    color:var(--brass-soft);
+    padding:1px 6px;
+    border-radius:4px;
+    font-family:var(--mono);
+    font-size:0.85em;
+  }
+  .bubble pre{
+    background:var(--ink-950);
+    border:1px solid rgba(216,163,83,0.15);
+    border-radius:var(--radius-sm);
+    padding:12px 14px;
+    overflow-x:auto;
+    margin:8px 0 12px;
+  }
+  .bubble pre code{
+    background:none;
+    padding:0;
+    color:var(--paper);
+  }
+  .bubble h3{
+    font-family:var(--serif);
+    font-size:1rem;
+    color:var(--brass-soft);
+    margin:0 0 8px;
+  }
+
+  .retry-btn{
+    margin-top:8px;
+    background:transparent;
+    border:1px solid rgba(201,112,95,0.4);
+    color:#eab8ac;
+    font-size:0.78rem;
+    padding:5px 10px;
+    border-radius:6px;
+    cursor:pointer;
+  }
+  .retry-btn:hover{ background:rgba(201,112,95,0.12); }
+
+  /* ---- Typing indicator ---- */
+  .typing-bubble{
+    display:flex;
+    gap:5px;
+    padding:14px 16px;
+    background:var(--ink-850);
+    border:1px solid rgba(216,163,83,0.14);
+    border-radius:var(--radius-md);
+    border-top-left-radius:4px;
+    width:fit-content;
+  }
+  .typing-dot{
+    width:6px;height:6px;
+    border-radius:50%;
+    background:var(--brass-soft);
+    animation:dotPulse 1.2s ease-in-out infinite;
+  }
+  .typing-dot:nth-child(2){ animation-delay:0.15s; }
+  .typing-dot:nth-child(3){ animation-delay:0.3s; }
+  @keyframes dotPulse{
+    0%,60%,100%{ opacity:0.3; transform:translateY(0); }
+    30%{ opacity:1; transform:translateY(-3px); }
+  }
+
+  /* ---- Input area ---- */
+  .composer{
+    border-top:1px solid rgba(233,236,243,0.07);
+    padding:16px 28px 20px;
+    z-index:2;
+    position:relative;
+    background:linear-gradient(180deg, transparent, var(--ink-950) 40%);
+  }
+  .composer-inner{
+    max-width:760px;
+    margin:0 auto;
+  }
+  .subject-row{
+    display:flex;
+    gap:8px;
+    margin-bottom:10px;
+    overflow-x:auto;
+    padding-bottom:2px;
+  }
+  .subject-row::-webkit-scrollbar{ height:4px; }
+  .subject-row::-webkit-scrollbar-thumb{ background:rgba(216,163,83,0.3); border-radius:4px; }
+  .subject-chip{
+    flex-shrink:0;
+    background:var(--ink-850);
+    border:1px solid rgba(216,163,83,0.15);
+    color:var(--paper-faint);
+    font-size:0.76rem;
+    padding:5px 12px;
+    border-radius:20px;
+    cursor:pointer;
+    white-space:nowrap;
+    transition:all 0.15s ease;
+  }
+  .subject-chip:hover{
+    border-color:var(--brass);
+    color:var(--brass-soft);
+  }
+
+  .input-row{
+    display:flex;
+    align-items:flex-end;
+    gap:10px;
+    background:var(--ink-850);
+    border:1px solid rgba(216,163,83,0.18);
+    border-radius:var(--radius-md);
+    padding:8px 8px 8px 16px;
+    transition:border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .input-row:focus-within{
+    border-color:var(--brass);
+    box-shadow:0 0 0 3px rgba(216,163,83,0.1);
+  }
+  #userInput{
+    flex:1;
+    background:none;
+    border:none;
+    outline:none;
+    resize:none;
+    color:var(--paper);
+    font-family:var(--sans);
+    font-size:0.92rem;
+    line-height:1.5;
+    max-height:140px;
+    padding:8px 0;
+  }
+  #userInput::placeholder{ color:var(--paper-faint); }
+
+  .send-btn{
+    background:linear-gradient(135deg, var(--brass-soft), var(--brass));
+    border:none;
+    color:var(--ink-950);
+    font-weight:700;
+    font-size:0.85rem;
+    width:40px;height:40px;
+    border-radius:var(--radius-sm);
+    cursor:pointer;
+    flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    transition:transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .send-btn:hover{ transform:translateY(-1px); box-shadow:0 6px 16px rgba(216,163,83,0.35); }
+  .send-btn:active{ transform:translateY(0); }
+  .send-btn:disabled{
+    opacity:0.4;
+    cursor:not-allowed;
+    transform:none;
+    box-shadow:none;
+  }
+
+  .composer-hint{
+    font-size:0.68rem;
+    color:var(--paper-faint);
+    text-align:center;
+    margin-top:8px;
+  }
+
+  /* ---- Settings modal ---- */
+  .overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(10,13,22,0.7);
+    backdrop-filter:blur(3px);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:50;
+    animation:fadeIn 0.2s ease;
+  }
+  .overlay.show{ display:flex; }
+  @keyframes fadeIn{ from{opacity:0;} to{opacity:1;} }
+
+  .modal{
+    background:var(--ink-850);
+    border:1px solid rgba(216,163,83,0.2);
+    border-radius:var(--radius-lg);
+    padding:26px;
+    width:400px;
+    max-width:90vw;
+    box-shadow:0 20px 60px rgba(0,0,0,0.5);
+    animation:modalIn 0.25s ease;
+  }
+  @keyframes modalIn{
+    from{opacity:0; transform:translateY(12px) scale(0.98);}
+    to{opacity:1; transform:translateY(0) scale(1);}
+  }
+  .modal h2{
+    font-family:var(--serif);
+    font-size:1.2rem;
+    margin:0 0 6px;
+    color:var(--paper);
+  }
+  .modal p{
+    font-size:0.82rem;
+    color:var(--paper-faint);
+    line-height:1.55;
+    margin:0 0 16px;
+  }
+  .modal input[type="password"], .modal input[type="text"]{
+    width:100%;
+    background:var(--ink-950);
+    border:1px solid rgba(233,236,243,0.15);
+    border-radius:var(--radius-sm);
+    padding:10px 12px;
+    color:var(--paper);
+    font-family:var(--mono);
+    font-size:0.85rem;
+    outline:none;
+    margin-bottom:12px;
+  }
+  .modal input:focus{ border-color:var(--brass); }
+  .modal-check{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:0.78rem;
+    color:var(--paper-faint);
+    margin-bottom:18px;
+  }
+  .modal-actions{
+    display:flex;
+    gap:10px;
+    justify-content:flex-end;
+  }
+  .btn-primary{
+    background:linear-gradient(135deg, var(--brass-soft), var(--brass));
+    color:var(--ink-950);
+    border:none;
+    font-weight:700;
+    font-size:0.84rem;
+    padding:9px 18px;
+    border-radius:var(--radius-sm);
+    cursor:pointer;
+  }
+  .btn-ghost{
+    background:transparent;
+    color:var(--paper-dim);
+    border:1px solid rgba(233,236,243,0.15);
+    font-size:0.84rem;
+    padding:9px 16px;
+    border-radius:var(--radius-sm);
+    cursor:pointer;
+  }
+  .btn-ghost:hover{ border-color:var(--paper-faint); }
+
+  /* ---- How-it-was-built panel ---- */
+  .build-panel{
+    position:fixed;
+    bottom:0;
+    left:280px;
+    right:0;
+    z-index:40;
+    font-size:0.85rem;
+  }
+  .build-toggle{
+    width:100%;
+    background:var(--ink-900);
+    border:none;
+    border-top:1px solid rgba(216,163,83,0.15);
+    color:var(--paper-faint);
+    padding:9px 28px;
+    text-align:left;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-family:var(--sans);
+    font-size:0.76rem;
+    letter-spacing:0.03em;
+  }
+  .build-toggle:hover{ color:var(--brass-soft); }
+  .build-chevron{ transition:transform 0.25s ease; }
+  .build-chevron.open{ transform:rotate(180deg); }
+
+  .build-content{
+    max-height:0;
+    overflow-y:auto;
+    background:var(--ink-900);
+    border-top:1px solid rgba(216,163,83,0.1);
+    transition:max-height 0.35s ease;
+  }
+  .build-content.open{ max-height:44vh; }
+  .build-content-inner{
+    padding:18px 28px 26px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:22px;
+  }
+  .build-col h4{
+    font-family:var(--serif);
+    color:var(--brass-soft);
+    font-size:0.92rem;
+    margin:0 0 8px;
+  }
+  .build-col p, .build-col li{
+    color:var(--paper-dim);
+    font-size:0.78rem;
+    line-height:1.6;
+  }
+  .build-col ul{ margin:0; padding-left:18px; }
+  .build-col li{ margin-bottom:6px; }
+
+  /* ---- Scrollbars ---- */
+  ::-webkit-scrollbar{ width:8px; }
+  ::-webkit-scrollbar-thumb{ background:rgba(216,163,83,0.25); border-radius:8px; }
+  ::-webkit-scrollbar-track{ background:transparent; }
+
+  /* ---- Responsive ---- */
+  @media (max-width:860px){
+    .app{ grid-template-columns:1fr; }
+    .desk{
+      position:fixed;
+      top:0; left:0; bottom:0;
+      width:260px;
+      z-index:60;
+      transform:translateX(-100%);
+      transition:transform 0.25s ease;
+      box-shadow:20px 0 60px rgba(0,0,0,0.5);
+    }
+    .desk.open{ transform:translateX(0); }
+    .menu-toggle{ display:block; }
+    .build-panel{ left:0; }
+    .build-content-inner{ grid-template-columns:1fr; gap:14px; }
+    .prompt-cards{ grid-template-columns:1fr; }
+    .bubble-wrap{ max-width:90%; }
+  }
+
+  .scrim{
+    display:none;
+    position:fixed; inset:0;
+    background:rgba(0,0,0,0.5);
+    z-index:55;
+  }
+  .scrim.show{ display:block; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="desk" id="desk">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div>
+        <div class="brand-name">Lumina</div>
+        <div class="brand-sub">Concept Tutor</div>
+      </div>
+    </div>
+
+    <div class="desk-section">
+      <div class="desk-label">Study Shelf</div>
+      <div class="shelf" id="shelf">
+        <button class="book-chip" data-q="Can you explain how eigenvalues and eigenvectors work, with a concrete example?">Linear Algebra</button>
+        <button class="book-chip" data-q="Walk me through how to derive the time complexity of merge sort.">Algorithms</button>
+        <button class="book-chip" data-q="Explain the difference between Type I and Type II errors in hypothesis testing.">Statistics</button>
+        <button class="book-chip" data-q="What's the intuition behind entropy in thermodynamics and information theory?">Thermodynamics</button>
+        <button class="book-chip" data-q="Explain opportunity cost and give an example relevant to a college student's life.">Economics</button>
+      </div>
+    </div>
+
+    <div class="desk-section">
+      <div class="desk-label">Session</div>
+      <button class="desk-btn" id="clearChatBtn">🗑 Clear conversation</button>
+      <button class="desk-btn" id="openSettingsBtn">🔑 API key settings</button>
+      <div class="key-status" id="keyStatus"></div>
+    </div>
+
+    <div class="desk-footer">
+      Lumina explains, checks understanding, and builds toward exam-ready clarity — one concept at a time.
+    </div>
+  </aside>
+
+  <div class="scrim" id="scrim"></div>
+
+  <!-- ============ MAIN NOTEBOOK ============ -->
+  <main class="notebook">
+    <div class="lamp-glow"></div>
+
+    <div class="topbar">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <button class="menu-toggle" id="menuToggle">☰</button>
+        <div class="topbar-title">Ask about <span>anything</span> — Lumina teaches the concept, not just the answer.</div>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="topSettingsBtn" title="API key settings">⚙</button>
+      </div>
+    </div>
+
+    <div class="chat-scroll" id="chatScroll">
+      <div class="chat-inner" id="chatInner">
+        <div class="empty-state" id="emptyState">
+          <div class="empty-title">What are we untangling today?</div>
+          <div class="empty-sub">Ask any college-level question — math, science, economics, code, history, whatever's due Thursday. Lumina explains it the way a great TA would: clearly, patiently, with an example that sticks.</div>
+          <div class="prompt-cards">
+            <button class="prompt-card" data-q="Explain Bayes' theorem like I'm seeing it for the first time, with a worked example.">Explain <b>Bayes' theorem</b> with a worked example</button>
+            <button class="prompt-card" data-q="What's the actual difference between correlation and causation, and how would I spot the difference in a study?">Difference between <b>correlation and causation</b></button>
+            <button class="prompt-card" data-q="Break down how photosynthesis converts light into chemical energy, step by step.">How does <b>photosynthesis</b> actually work</button>
+            <button class="prompt-card" data-q="I don't get why we need Big-O notation. Explain it and then quiz me with one problem.">Why does <b>Big-O notation</b> matter</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="composer">
+      <div class="composer-inner">
+        <div class="subject-row">
+          <button class="subject-chip" data-insert="In physics, ">Physics</button>
+          <button class="subject-chip" data-insert="In calculus, ">Calculus</button>
+          <button class="subject-chip" data-insert="In computer science, ">CS</button>
+          <button class="subject-chip" data-insert="In organic chemistry, ">Chemistry</button>
+          <button class="subject-chip" data-insert="In psychology, ">Psychology</button>
+          <button class="subject-chip" data-insert="In macroeconomics, ">Macroeconomics</button>
+          <button class="subject-chip" data-insert="In history, ">History</button>
+        </div>
+        <div class="input-row">
+          <textarea id="userInput" rows="1" placeholder="Ask Lumina to explain a concept…"></textarea>
+          <button class="send-btn" id="sendBtn" title="Send">➤</button>
+        </div>
+        <div class="composer-hint">Enter to send · Shift+Enter for a new line</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ============ SETTINGS MODAL ============ -->
+<div class="overlay" id="settingsOverlay">
+  <div class="modal">
+    <h2>Connect your API key</h2>
+    <p>Lumina calls the Anthropic API directly from your browser. Your key is only ever sent to api.anthropic.com — never anywhere else.</p>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-…">
+    <label class="modal-check">
+      <input type="checkbox" id="rememberKey" style="accent-color:#d8a353;">
+      Remember this key on this device (localStorage)
+    </label>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="cancelSettings">Cancel</button>
+      <button class="btn-primary" id="saveSettings">Save key</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ HOW THIS WAS BUILT ============ -->
+<div class="build-panel">
+  <button class="build-toggle" id="buildToggle">
+    <span>📐 How this was built — system prompt design, UI decisions &amp; extension ideas</span>
+    <span class="build-chevron" id="buildChevron">▾</span>
+  </button>
+  <div class="build-content" id="buildContent">
+    <div class="build-content-inner">
+      <div class="build-col">
+        <h4>The system prompt</h4>
+        <ul>
+          <li><b style="color:var(--paper)">Role &amp; audience</b> are pinned explicitly (college/university tutor) so explanations calibrate depth correctly — not too basic, not research-level.</li>
+          <li><b style="color:var(--paper)">Teach, don't do</b> — for graded work, Lumina is instructed to explain method and structure rather than output a submittable answer verbatim.</li>
+          <li><b style="color:var(--paper)">Format contract</b> — short paragraphs, bolded key terms, worked examples, and an optional check-for-understanding close, so replies read like a chat, not a wall of text.</li>
+          <li><b style="color:var(--paper)">Edge cases</b> — ambiguous subject → clarify or state an assumption; off-topic → gentle redirect; unsafe/dishonest requests → decline with an alternative.</li>
+        </ul>
+      </div>
+      <div class="build-col">
+        <h4>UI decisions</h4>
+        <ul>
+          <li>The <b style="color:var(--paper)">desk / notebook</b> metaphor (side shelf of subjects, glowing "lamp" over the chat) gives the interface a studious identity instead of a generic chatbot shell.</li>
+          <li>Assistant replies render as <b style="color:var(--paper)">index-card bubbles</b> with a folded corner — a visual echo of flashcards, reinforcing the tutoring frame.</li>
+          <li>Subject chips insert context ("In physics, …") so Lumina calibrates its examples without students having to specify a domain manually every time.</li>
+          <li>Loading, error, and empty states are all designed states, not afterthoughts — including a retry action if a request fails.</li>
+        </ul>
+      </div>
+      <div class="build-col">
+        <h4>Where this goes next</h4>
+        <ul>
+          <li><b style="color:var(--paper)">Tools:</b> a calculator/graphing tool call for math, or web search for citing a source when a student asks "is this still true?"</li>
+          <li><b style="color:var(--paper)">Memory:</b> persist each student's weak topics across sessions to bias future explanations and resurface a spaced-repetition quiz.</li>
+          <li><b style="color:var(--paper)">Multi-step workflows:</b> an explicit "explain → quiz me → grade my answer" loop, with a visible progress tracker per concept.</li>
+          <li><b style="color:var(--paper)">Streaming:</b> swap the single fetch for SSE streaming so replies appear token-by-token instead of all at once.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------------- SYSTEM PROMPT ----------------
+  const SYSTEM_PROMPT = `You are Lumina, a warm, encouraging personal tutor for college and university students. You help students build genuine, exam-ready understanding of concepts across any subject — STEM, humanities, business, social sciences, and beyond.
+
+ROLE & AUDIENCE
+- Your students are college/university-level. Calibrate depth accordingly: assume they know high-school fundamentals, but explain new concepts from first principles rather than assuming prior exposure to the specific topic.
+- Your single goal each session: leave the student with a clearer, more confident, more exam-ready understanding than they had before asking.
+
+HOW YOU EXPLAIN
+- Open with a plain-language explanation of the core idea before introducing formal terms or notation.
+- Follow with at least one concrete, worked example that anchors the idea (a real calculation, a real scenario, real code, a real historical case — never a purely abstract description alone).
+- Use analogies when they genuinely clarify, not just to sound friendly.
+- Define key terms in bold the first time they appear.
+- For procedures, derivations, proofs, or code, walk through the steps in order rather than jumping to the final result.
+- Keep paragraphs short (2-4 sentences). Use bullet or numbered lists for multi-part explanations. Avoid dense walls of text.
+- Default to a moderate depth (enough for real understanding, not a textbook chapter). If the student wants more or less depth, adjust immediately and follow their lead for the rest of the conversation.
+- Where useful, close with a brief check-in — a quick question, an invitation to try a related problem, or an offer to go deeper — but do not force this every single time; vary it naturally like a real tutor would.
+
+BOUNDARIES ON DOING THE WORK FOR THEM
+- If a student pastes what is clearly a graded assignment, quiz, or exam question and asks for "the answer," do not simply hand over a submittable final answer. Instead, teach the underlying method or concept using a similar or simplified example, and guide them to apply it themselves.
+- If a student asks you to write an entire essay, lab report, or take-home submission for them, decline that specific framing, and offer instead to help them understand the topic, build an outline, or critique a draft they write themselves.
+- Solving a one-off practice problem, homework-adjacent example problem, or "can you show me how this type of problem works" is fine and encouraged — that is core tutoring.
+
+TONE & PERSONALITY
+- Friendly, patient, and encouraging — never condescending, never robotic. Sound like a great TA who genuinely likes the subject.
+- Normalize confusion ("that's a genuinely tricky spot — here's what's going on") rather than implying a question is trivial.
+- No excessive exclamation points or forced enthusiasm; warmth should come from clarity and patience, not decoration.
+
+ACCURACY & HONESTY
+- Never fabricate facts, formulas, historical details, or citations. If you are not confident about a specific fact, say so plainly and suggest the student verify with their textbook, professor, or a primary source.
+- If a question is outside your knowledge or ambiguous, ask one brief clarifying question, or state the assumption you are making and proceed.
+
+EDGE CASES
+- If the subject/topic is unclear from a short or vague question, either ask one clarifying question or make a clearly-stated reasonable assumption and answer — do not stall the conversation with multiple questions in a row.
+- If the student goes off-topic (casual chat, venting, unrelated requests), respond briefly and kindly, then gently steer back toward what you can help them learn.
+- If asked for anything outside academic tutoring (medical, legal, personal, or otherwise unrelated advice), note briefly that it's outside what you can help with here and redirect to the academic topic if there is one.
+- Decline requests for dishonest academic shortcuts (impersonating a student on a live proctored exam, fabricating data for a lab report, etc.) and offer the legitimate tutoring alternative instead.
+
+OUTPUT FORMAT
+- Conversational chat register. Use markdown: **bold** for key terms, bullet/numbered lists for steps, and code blocks for code or formulas where that improves clarity. No rigid templates or repeated headers — read like a real conversation, not a generated report.`;
+
+  const MODEL = "claude-sonnet-4-6";
+  const API_URL = "https://api.anthropic.com/v1/messages";
+
+  // ---------------- STATE ----------------
+  let history = []; // {role, content}
+  let apiKey = localStorage.getItem("lumina_api_key") || "";
+  let isSending = false;
+
+  // ---------------- DOM ----------------
+  const chatInner = document.getElementById("chatInner");
+  const chatScroll = document.getElementById("chatScroll");
+  const emptyState = document.getElementById("emptyState");
+  const userInput = document.getElementById("userInput");
+  const sendBtn = document.getElementById("sendBtn");
+  const keyStatus = document.getElementById("keyStatus");
+  const settingsOverlay = document.getElementById("settingsOverlay");
+  const apiKeyInput = document.getElementById("apiKeyInput");
+  const rememberKey = document.getElementById("rememberKey");
+  const desk = document.getElementById("desk");
+  const scrim = document.getElementById("scrim");
+  const buildToggle = document.getElementById("buildToggle");
+  const buildContent = document.getElementById("buildContent");
+  const buildChevron = document.getElementById("buildChevron");
+
+  // ---------------- INIT ----------------
+  updateKeyStatus();
+
+  // ---------------- MARKDOWN-LITE RENDERER ----------------
+  function escapeHtml(str){
+    return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  function renderMarkdown(text){
+    // extract fenced code blocks first
+    const codeBlocks = [];
+    text = text.replace(/```([\s\S]*?)```/g, function(_, code){
+      const idx = codeBlocks.length;
+      codeBlocks.push(code.replace(/^\w*\n/, ""));
+      return "@@CODEBLOCK" + idx + "@@";
+    });
+
+    let escaped = escapeHtml(text);
+
+    // inline code
+    escaped = escaped.replace(/`([^`]+)`/g, "<code>$1</code>");
+    // bold
+    escaped = escaped.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+    // headers ###
+    escaped = escaped.replace(/^### (.*)$/gm, "<h3>$1</h3>");
+
+    const lines = escaped.split("\n");
+    let html = "";
+    let inUl = false, inOl = false;
+
+    function closeLists(){
+      if(inUl){ html += "</ul>"; inUl = false; }
+      if(inOl){ html += "</ol>"; inOl = false; }
+    }
+
+    lines.forEach(function(line){
+      const trimmed = line.trim();
+      if(/^[-•]\s+/.test(trimmed)){
+        if(!inUl){ closeLists(); html += "<ul>"; inUl = true; }
+        html += "<li>" + trimmed.replace(/^[-•]\s+/, "") + "</li>";
+      } else if(/^\d+\.\s+/.test(trimmed)){
+        if(!inOl){ closeLists(); html += "<ol>"; inOl = true; }
+        html += "<li>" + trimmed.replace(/^\d+\.\s+/, "") + "</li>";
+      } else if(trimmed === ""){
+        closeLists();
+      } else if(/^<h3>/.test(trimmed)){
+        closeLists();
+        html += trimmed;
+      } else {
+        closeLists();
+        html += "<p>" + trimmed + "</p>";
+      }
+    });
+    closeLists();
+
+    // restore code blocks
+    html = html.replace(/@@CODEBLOCK(\d+)@@/g, function(_, idx){
+      return "<pre><code>" + escapeHtml(codeBlocks[parseInt(idx,10)]) + "</code></pre>";
+    });
+
+    return html;
+  }
+
+  // ---------------- RENDERING ----------------
+  function hideEmptyState(){
+    if(emptyState) emptyState.style.display = "none";
+  }
+
+  function scrollToBottom(){
+    requestAnimationFrame(function(){
+      chatScroll.scrollTop = chatScroll.scrollHeight;
+    });
+  }
+
+  function addUserMessage(text){
+    hideEmptyState();
+    const msg = document.createElement("div");
+    msg.className = "msg user";
+    msg.innerHTML =
+      '<div class="avatar user">You</div>' +
+      '<div class="bubble-wrap">' +
+        '<div class="bubble user">' + escapeHtml(text).replace(/\n/g,"<br>") + '</div>' +
+      '</div>';
+    chatInner.appendChild(msg);
+    scrollToBottom();
+  }
+
+  function addTutorMessage(text){
+    hideEmptyState();
+    const msg = document.createElement("div");
+    msg.className = "msg tutor";
+    msg.innerHTML =
+      '<div class="avatar tutor">L</div>' +
+      '<div class="bubble-wrap">' +
+        '<div class="tag-pin">Lumina</div>' +
+        '<div class="bubble tutor">' + renderMarkdown(text) + '</div>' +
+      '</div>';
+    chatInner.appendChild(msg);
+    scrollToBottom();
+  }
+
+  function addErrorMessage(text, retryFn){
+    hideEmptyState();
+    const msg = document.createElement("div");
+    msg.className = "msg tutor";
+    const retryId = "retry_" + Date.now();
+    msg.innerHTML =
+      '<div class="avatar tutor">!</div>' +
+      '<div class="bubble-wrap">' +
+        '<div class="tag-pin" style="color:#c9705f;">Something went wrong</div>' +
+        '<div class="bubble error"><p>' + escapeHtml(text) + '</p>' +
+        '<button class="retry-btn" id="' + retryId + '">Try again</button></div>' +
+      '</div>';
+    chatInner.appendChild(msg);
+    scrollToBottom();
+    document.getElementById(retryId).addEventListener("click", retryFn);
+  }
+
+  let typingEl = null;
+  function showTyping(){
+    typingEl = document.createElement("div");
+    typingEl.className = "msg tutor";
+    typingEl.innerHTML =
+      '<div class="avatar tutor">L</div>' +
+      '<div class="bubble-wrap">' +
+        '<div class="typing-bubble"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>' +
+      '</div>';
+    chatInner.appendChild(typingEl);
+    scrollToBottom();
+  }
+  function hideTyping(){
+    if(typingEl && typingEl.parentNode){ typingEl.parentNode.removeChild(typingEl); }
+    typingEl = null;
+  }
+
+  // ---------------- API CALL ----------------
+  async function callLumina(userText, isRetry){
+    if(!apiKey){
+      openSettings();
+      keyStatus.classList.add("show","missing");
+      keyStatus.textContent = "Add your API key to start chatting with Lumina.";
+      return;
+    }
+
+    if(!isRetry){
+      history.push({role:"user", content:userText});
+      addUserMessage(userText);
+    }
+
+    isSending = true;
+    sendBtn.disabled = true;
+    showTyping();
+
+    try {
+      const res = await fetch(API_URL, {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "x-api-key": apiKey,
+          "anthropic-version":"2023-06-01",
+          "anthropic-dangerous-direct-browser-access":"true"
+        },
+        body: JSON.stringify({
+          model: MODEL,
+          max_tokens: 1600,
+          system: SYSTEM_PROMPT,
+          messages: history.map(function(m){ return {role:m.role, content:m.content}; })
+        })
+      });
+
+      hideTyping();
+
+      if(!res.ok){
+        let msg = "The request failed (HTTP " + res.status + ").";
+        try{
+          const errData = await res.json();
+          if(errData && errData.error && errData.error.message){
+            msg = errData.error.message;
+          }
+        }catch(e){}
+        if(res.status === 401){
+          msg = "That API key was rejected. Check it in settings and try again.";
+        }
+        throw new Error(msg);
+      }
+
+      const data = await res.json();
+      const textBlock = (data.content || []).find(function(c){ return c.type === "text"; });
+      const reply = textBlock ? textBlock.text : "I couldn't generate a response that time — try asking again.";
+
+      history.push({role:"assistant", content:reply});
+      addTutorMessage(reply);
+
+    } catch(err){
+      hideTyping();
+      addErrorMessage(err.message || "Network error — please check your connection and try again.", function(){
+        callLumina(userText, true);
+      });
+    } finally {
+      isSending = false;
+      sendBtn.disabled = false;
+    }
+  }
+
+  // ---------------- INPUT HANDLING ----------------
+  function autoGrow(){
+    userInput.style.height = "auto";
+    userInput.style.height = Math.min(userInput.scrollHeight, 140) + "px";
+  }
+  userInput.addEventListener("input", autoGrow);
+
+  function handleSend(){
+    const text = userInput.value.trim();
+    if(!text || isSending) return;
+    userInput.value = "";
+    autoGrow();
+    callLumina(text, false);
+  }
+
+  sendBtn.addEventListener("click", handleSend);
+  userInput.addEventListener("keydown", function(e){
+    if(e.key === "Enter" && !e.shiftKey){
+      e.preventDefault();
+      handleSend();
+    }
+  });
+
+  // ---------------- QUICK PROMPTS / CHIPS ----------------
+  document.querySelectorAll("[data-q]").forEach(function(el){
+    el.addEventListener("click", function(){
+      userInput.value = el.getAttribute("data-q");
+      autoGrow();
+      userInput.focus();
+      closeMobileMenu();
+    });
+  });
+
+  document.querySelectorAll("[data-insert]").forEach(function(el){
+    el.addEventListener("click", function(){
+      const prefix = el.getAttribute("data-insert");
+      if(!userInput.value.toLowerCase().startsWith(prefix.toLowerCase().split(",")[0])){
+        userInput.value = prefix + userInput.value;
+      }
+      autoGrow();
+      userInput.focus();
+    });
+  });
+
+  // ---------------- CLEAR CHAT ----------------
+  document.getElementById("clearChatBtn").addEventListener("click", function(){
+    history = [];
+    chatInner.innerHTML = "";
+    chatInner.appendChild(emptyState);
+    emptyState.style.display = "block";
+    closeMobileMenu();
+  });
+
+  // ---------------- SETTINGS MODAL ----------------
+  function openSettings(){
+    apiKeyInput.value = apiKey;
+    rememberKey.checked = !!localStorage.getItem("lumina_api_key");
+    settingsOverlay.classList.add("show");
+    setTimeout(function(){ apiKeyInput.focus(); }, 50);
+  }
+  function closeSettings(){
+    settingsOverlay.classList.remove("show");
+  }
+  document.getElementById("openSettingsBtn").addEventListener("click", openSettings);
+  document.getElementById("topSettingsBtn").addEventListener("click", openSettings);
+  document.getElementById("cancelSettings").addEventListener("click", closeSettings);
+  settingsOverlay.addEventListener("click", function(e){
+    if(e.target === settingsOverlay) closeSettings();
+  });
+  document.getElementById("saveSettings").addEventListener("click", function(){
+    apiKey = apiKeyInput.value.trim();
+    if(rememberKey.checked && apiKey){
+      localStorage.setItem("lumina_api_key", apiKey);
+    } else {
+      localStorage.removeItem("lumina_api_key");
+    }
+    updateKeyStatus();
+    closeSettings();
+  });
+
+  function updateKeyStatus(){
+    if(apiKey){
+      keyStatus.classList.remove("missing");
+      keyStatus.classList.add("show");
+      keyStatus.textContent = "✓ Key connected for this session.";
+    } else {
+      keyStatus.classList.add("show","missing");
+      keyStatus.textContent = "No API key set yet.";
+    }
+  }
+
+  // ---------------- MOBILE MENU ----------------
+  const menuToggle = document.getElementById("menuToggle");
+  menuToggle.addEventListener("click", function(){
+    desk.classList.add("open");
+    scrim.classList.add("show");
+  });
+  function closeMobileMenu(){
+    desk.classList.remove("open");
+    scrim.classList.remove("show");
+  }
+  scrim.addEventListener("click", closeMobileMenu);
+
+  // ---------------- BUILD PANEL TOGGLE ----------------
+  buildToggle.addEventListener("click", function(){
+    const isOpen = buildContent.classList.toggle("open");
+    buildChevron.classList.toggle("open", isOpen);
+  });
+
+})();
+</script>
+</body>
+</html>
