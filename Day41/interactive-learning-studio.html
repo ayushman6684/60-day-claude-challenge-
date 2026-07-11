@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interactive Learning Studio · Java OOP</title>
+<style>
+:root{
+  --bg:#14110f; --bg-soft:#1a1613; --surface:#211c18; --surface-2:#2a2420;
+  --border:#3a332c; --border-soft:#2c2620;
+  --text:#f1e9dc; --text-dim:#b7ab9b; --text-faint:#7d7266;
+  --accent:#e3a857; --accent-dim:#a6793e; --accent-ink:#1a1410;
+  --teal:#4a9c96; --teal-dim:#2f6f6b;
+  --success:#6fb98f; --success-ink:#0d1f16;
+  --error:#e2685c; --error-ink:#241110;
+  --font-display:Georgia,'Iowan Old Style','Palatino Linotype',serif;
+  --font-body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --font-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace;
+  --radius:10px;
+  --shadow: 0 8px 30px rgba(0,0,0,.35);
+}
+[data-theme="light"]{
+  --bg:#f7f2ea; --bg-soft:#efe8db; --surface:#ffffff; --surface-2:#f4eee2;
+  --border:#e0d5c0; --border-soft:#ece3d2;
+  --text:#241e18; --text-dim:#5c5346; --text-faint:#8a8072;
+  --accent:#b9782e; --accent-dim:#8f5c22; --accent-ink:#fff8ec;
+  --teal:#2f6f6b; --teal-dim:#1f4d49;
+  --success:#2f7a53; --success-ink:#eafcf2;
+  --error:#b23b30; --error-ink:#fdecea;
+  --shadow: 0 8px 30px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0; background:var(--bg); color:var(--text); font-family:var(--font-body);
+  transition:background .3s ease, color .3s ease; line-height:1.6;
+}
+@media (prefers-reduced-motion: reduce){ *{animation-duration:.001ms !important; transition-duration:.001ms !important; scroll-behavior:auto !important;} }
+
+::selection{ background:var(--accent); color:var(--accent-ink); }
+
+/* ---------- layout shell ---------- */
+.app{ display:flex; min-height:100vh; }
+.sidebar{
+  width:280px; flex-shrink:0; background:var(--bg-soft); border-right:1px solid var(--border);
+  position:sticky; top:0; height:100vh; overflow-y:auto; padding:22px 16px; z-index:40;
+}
+.brand{ display:flex; align-items:center; gap:10px; padding:2px 6px 18px; }
+.brand svg{ width:34px; height:34px; flex-shrink:0; }
+.brand-text .t1{ font-family:var(--font-display); font-size:16.5px; font-weight:700; letter-spacing:.2px; }
+.brand-text .t2{ font-size:11px; color:var(--text-faint); text-transform:uppercase; letter-spacing:1.5px; }
+
+.nav-section-label{ font-size:11px; text-transform:uppercase; letter-spacing:1.4px; color:var(--text-faint); margin:18px 8px 8px; }
+.nav-item{
+  display:flex; align-items:center; gap:10px; padding:10px 10px; border-radius:8px; cursor:pointer;
+  color:var(--text-dim); font-size:14px; border:1px solid transparent; transition:background .15s, color .15s;
+}
+.nav-item:hover{ background:var(--surface-2); color:var(--text); }
+.nav-item.active{ background:var(--surface-2); color:var(--accent); border-color:var(--border); font-weight:600; }
+.nav-item.locked{ opacity:.45; cursor:not-allowed; }
+.nav-badge{ margin-left:auto; font-size:11px; font-family:var(--font-mono); color:var(--text-faint); }
+.nav-badge.done{ color:var(--success); }
+.nav-dot{ width:20px; height:20px; border-radius:50%; border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:10.5px; font-family:var(--font-mono); flex-shrink:0; }
+.nav-item.active .nav-dot{ border-color:var(--accent); color:var(--accent); }
+.nav-item .nav-dot.done{ background:var(--success); border-color:var(--success); color:var(--success-ink); }
+
+.sidebar-progress{ margin-top:20px; padding:14px; border:1px solid var(--border); border-radius:var(--radius); background:var(--surface); }
+.sidebar-progress .label{ display:flex; justify-content:space-between; font-size:11.5px; color:var(--text-faint); margin-bottom:8px; }
+.bar-track{ height:7px; border-radius:5px; background:var(--surface-2); overflow:hidden; }
+.bar-fill{ height:100%; background:linear-gradient(90deg,var(--teal),var(--accent)); border-radius:5px; transition:width .5s cubic-bezier(.4,0,.2,1); width:0%; }
+.xp-row{ display:flex; align-items:center; gap:6px; margin-top:10px; font-size:12px; color:var(--text-dim); font-family:var(--font-mono); }
+
+.theme-toggle{ display:flex; align-items:center; justify-content:space-between; margin-top:14px; padding:10px 12px; border:1px solid var(--border); border-radius:var(--radius); background:var(--surface); font-size:12.5px; color:var(--text-dim); }
+.theme-toggle button{ background:var(--surface-2); border:1px solid var(--border); color:var(--text); border-radius:6px; padding:5px 9px; font-size:12px; cursor:pointer; font-family:var(--font-body); }
+.theme-toggle button:hover{ border-color:var(--accent); color:var(--accent); }
+
+.main{ flex:1; min-width:0; }
+.topbar{
+  position:sticky; top:0; z-index:30; background:color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter:blur(10px); border-bottom:1px solid var(--border); padding:12px 28px;
+  display:flex; align-items:center; justify-content:space-between; gap:14px;
+}
+.topbar .crumbs{ font-size:13px; color:var(--text-faint); font-family:var(--font-mono); }
+.menu-btn{ display:none; }
+.topbar-progress{ flex:1; max-width:320px; }
+
+.content{ max-width:880px; margin:0 auto; padding:40px 32px 120px; }
+section.module{ scroll-margin-top:70px; }
+
+/* ---------- intro / hero ---------- */
+.hero{ padding-bottom:10px; }
+.hero .eyebrow{ font-family:var(--font-mono); color:var(--teal); font-size:12.5px; letter-spacing:2px; text-transform:uppercase; }
+.hero h1{ font-family:var(--font-display); font-size:44px; line-height:1.08; margin:10px 0 14px; letter-spacing:.2px; }
+.hero h1 em{ color:var(--accent); font-style:normal; border-bottom:3px solid var(--accent); }
+.hero p.lede{ font-size:17px; color:var(--text-dim); max-width:60ch; }
+
+.meta-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:28px 0; }
+.meta-card{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; }
+.meta-card .k{ font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-faint); margin-bottom:6px; }
+.meta-card .v{ font-family:var(--font-display); font-size:19px; }
+
+.box{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:22px 24px; margin:22px 0; }
+.box h3{ margin-top:0; font-family:var(--font-display); font-size:19px; }
+.box ul{ margin:8px 0 0; padding-left:20px; }
+.box li{ margin-bottom:6px; color:var(--text-dim); }
+
+.reward-box{ display:flex; gap:16px; align-items:center; background:linear-gradient(135deg, color-mix(in srgb, var(--teal) 14%, var(--surface)), color-mix(in srgb, var(--accent) 10%, var(--surface))); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; }
+.reward-box .icon{ font-size:30px; }
+.reward-box .rt{ font-weight:700; font-family:var(--font-display); font-size:16px; }
+.reward-box .rs{ font-size:13.5px; color:var(--text-dim); }
+
+.btn{ display:inline-flex; align-items:center; gap:8px; border:1px solid var(--accent); background:var(--accent); color:var(--accent-ink); font-weight:700; padding:12px 22px; border-radius:8px; cursor:pointer; font-size:14.5px; font-family:var(--font-body); transition:transform .15s, box-shadow .15s; }
+.btn:hover{ transform:translateY(-1px); box-shadow:0 6px 18px color-mix(in srgb, var(--accent) 35%, transparent); }
+.btn.secondary{ background:transparent; color:var(--text); border-color:var(--border); font-weight:600; }
+.btn.secondary:hover{ border-color:var(--teal); color:var(--teal); }
+.btn.small{ padding:8px 14px; font-size:13px; }
+.btn:disabled{ opacity:.4; cursor:not-allowed; transform:none; box-shadow:none; }
+
+/* ---------- module chrome ---------- */
+.module-head{ display:flex; align-items:baseline; gap:14px; margin:70px 0 6px; padding-top:20px; border-top:1px solid var(--border-soft); }
+.module-head .num{ font-family:var(--font-mono); color:var(--accent); font-size:14px; }
+.module-head h2{ font-family:var(--font-display); font-size:29px; margin:0; }
+.module-sub{ color:var(--text-faint); font-size:14px; margin-bottom:26px; }
+
+.lock-overlay{ text-align:center; padding:70px 20px; border:1px dashed var(--border); border-radius:var(--radius); color:var(--text-faint); background:var(--surface); }
+.lock-overlay .lk{ font-size:30px; margin-bottom:10px; }
+
+h3.sec-h{ font-family:var(--font-display); font-size:20px; margin:32px 0 10px; display:flex; align-items:center; gap:8px; }
+h3.sec-h::before{ content:''; width:5px; height:18px; background:var(--teal); border-radius:3px; display:inline-block; }
+p{ color:var(--text-dim); }
+.callout{ border-left:3px solid var(--teal); background:var(--surface); border-radius:0 8px 8px 0; padding:14px 18px; margin:16px 0; }
+.callout.analogy{ border-left-color:var(--accent); }
+.callout.analogy .lab{ color:var(--accent); }
+.callout.warn{ border-left-color:var(--error); }
+.callout.warn .lab{ color:var(--error); }
+.callout .lab{ font-family:var(--font-mono); font-size:11.5px; text-transform:uppercase; letter-spacing:1.4px; color:var(--teal); display:block; margin-bottom:6px; }
+
+pre{ background:#0f0d0b; color:#eadfce; border:1px solid var(--border-soft); border-radius:8px; padding:16px 18px; overflow-x:auto; font-family:var(--font-mono); font-size:13.2px; line-height:1.55; }
+[data-theme="light"] pre{ background:#26221d; color:#f2ead9; }
+code{ font-family:var(--font-mono); font-size:.92em; background:var(--surface-2); padding:1.5px 5px; border-radius:4px; }
+pre code{ background:none; padding:0; }
+.tok-kw{ color:#e3a857; } .tok-type{ color:#4a9c96; } .tok-str{ color:#9fc98f; } .tok-com{ color:#7d7266; font-style:italic; } .tok-fn{ color:#c9b6e4; } .tok-annotation{ color:#e2685c; }
+
+table.cmp{ width:100%; border-collapse:collapse; margin:16px 0; font-size:14px; }
+table.cmp th, table.cmp td{ border:1px solid var(--border); padding:10px 12px; text-align:left; vertical-align:top; }
+table.cmp th{ background:var(--surface-2); font-family:var(--font-display); font-weight:700; }
+table.cmp tr:nth-child(even) td{ background:color-mix(in srgb, var(--surface-2) 40%, transparent); }
+
+.diagram-wrap{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px; margin:20px 0; overflow-x:auto; }
+.diagram-wrap svg{ display:block; margin:0 auto; max-width:100%; }
+.diagram-cap{ text-align:center; font-size:12px; color:var(--text-faint); font-family:var(--font-mono); margin-top:10px; }
+
+.exercise{ border:1px solid var(--border); border-radius:var(--radius); padding:20px 22px; margin:20px 0; background:var(--surface); }
+.exercise .tag{ font-family:var(--font-mono); font-size:11px; color:var(--bg); background:var(--teal); padding:3px 9px; border-radius:5px; letter-spacing:1px; text-transform:uppercase; }
+.exercise textarea{ width:100%; min-height:110px; margin-top:12px; background:#0f0d0b; color:#eadfce; border:1px solid var(--border-soft); border-radius:8px; padding:12px; font-family:var(--font-mono); font-size:13px; resize:vertical; }
+.exercise .reveal{ margin-top:12px; }
+.exercise .reveal-body{ display:none; margin-top:10px; padding-top:10px; border-top:1px dashed var(--border); }
+.exercise .reveal-body.show{ display:block; }
+
+.takeaways{ background:color-mix(in srgb, var(--success) 8%, var(--surface)); border:1px solid color-mix(in srgb, var(--success) 30%, var(--border)); border-radius:var(--radius); padding:18px 20px; margin:24px 0; }
+.takeaways h3{ margin-top:0; color:var(--success); font-family:var(--font-display); font-size:17px; }
+
+/* ---------- quiz ---------- */
+.quiz{ margin:40px 0; border:1px solid var(--border); border-radius:var(--radius); background:var(--surface); padding:26px; }
+.quiz-head{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:16px; }
+.quiz-head h3{ font-family:var(--font-display); font-size:20px; margin:0; }
+.quiz-progress{ font-family:var(--font-mono); font-size:12px; color:var(--text-faint); }
+.q-block{ padding:16px 0; border-top:1px solid var(--border-soft); }
+.q-block:first-of-type{ border-top:none; }
+.q-text{ font-weight:600; margin-bottom:12px; color:var(--text); }
+.q-opts{ display:flex; flex-direction:column; gap:8px; }
+.opt{ display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border:1px solid var(--border); border-radius:8px; cursor:pointer; font-size:14px; color:var(--text-dim); transition:border-color .15s, background .15s; }
+.opt:hover{ border-color:var(--teal); }
+.opt input{ margin-top:3px; accent-color:var(--accent); }
+.opt.correct{ border-color:var(--success); background:color-mix(in srgb, var(--success) 12%, transparent); color:var(--text); }
+.opt.wrong{ border-color:var(--error); background:color-mix(in srgb, var(--error) 12%, transparent); color:var(--text); }
+.q-explain{ display:none; margin-top:10px; padding:10px 12px; border-radius:8px; background:var(--surface-2); font-size:13.3px; color:var(--text-dim); border-left:3px solid var(--teal); }
+.q-explain.show{ display:block; }
+.quiz-actions{ display:flex; gap:12px; align-items:center; margin-top:20px; }
+.quiz-result{ display:none; margin-top:18px; padding:18px; border-radius:var(--radius); text-align:center; }
+.quiz-result.show{ display:block; }
+.quiz-result .score{ font-family:var(--font-display); font-size:34px; }
+.quiz-result .tier{ font-family:var(--font-mono); font-size:12.5px; letter-spacing:1.5px; text-transform:uppercase; margin-top:4px; }
+
+/* ---------- final / resources ---------- */
+.cheat-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+@media (max-width:720px){ .cheat-grid{ grid-template-columns:1fr; } }
+.cheat-card{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; }
+.cheat-card h4{ margin:0 0 8px; font-family:var(--font-display); font-size:15.5px; color:var(--accent); }
+
+.res-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin:16px 0 30px; }
+@media (max-width:720px){ .res-grid{ grid-template-columns:1fr; } }
+.res-card{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; }
+.res-card h4{ font-family:var(--font-mono); font-size:12px; text-transform:uppercase; letter-spacing:1.2px; color:var(--teal); margin:0 0 10px; }
+.res-card ul{ margin:0; padding-left:18px; }
+.res-card li{ margin-bottom:7px; font-size:13.8px; color:var(--text-dim); }
+.kw-tags{ display:flex; flex-wrap:wrap; gap:8px; }
+.kw-tag{ font-family:var(--font-mono); font-size:12.5px; background:var(--surface-2); border:1px solid var(--border); padding:5px 10px; border-radius:6px; color:var(--text-dim); }
+
+.certificate{ border:2px solid var(--accent); border-radius:var(--radius); padding:36px; text-align:center; background:var(--surface); margin:20px 0; }
+.certificate .cert-title{ font-family:var(--font-display); font-size:26px; color:var(--accent); }
+.certificate .cert-name{ font-family:var(--font-display); font-size:20px; margin:16px 0; border-bottom:2px solid var(--border); display:inline-block; padding:0 20px 8px; min-width:260px; }
+.certificate input{ background:transparent; border:none; text-align:center; font-family:var(--font-display); font-size:20px; color:var(--text); width:100%; outline:none; }
+
+footer.done-footer{ text-align:center; padding:60px 0 20px; color:var(--text-faint); font-size:13px; }
+
+@media (max-width:900px){
+  .sidebar{ position:fixed; left:-300px; transition:left .25s ease; box-shadow:var(--shadow); }
+  .sidebar.open{ left:0; }
+  .menu-btn{ display:inline-flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border); color:var(--text); padding:8px 12px; border-radius:8px; cursor:pointer; }
+  .meta-grid{ grid-template-columns:1fr 1fr; }
+  .hero h1{ font-size:32px; }
+  .content{ padding:28px 18px 100px; }
+}
+@media print{
+  .sidebar, .topbar, .btn, .quiz-actions, .exercise textarea, .lock-overlay{ display:none !important; }
+  body{ background:#fff; color:#000; }
+  .box, .diagram-wrap, .cheat-card, .res-card{ break-inside:avoid; border-color:#ccc; }
+}
+
+/* Certificate-only print mode: hidden on screen, only shown inside @media print */
+#cert-print-only{ display:none; }
+#cert-print-only .cp-eyebrow{ font-family:var(--font-mono); letter-spacing:3px; text-transform:uppercase; font-size:13px; color:#8a6a2e; margin-bottom:18px; }
+#cert-print-only .cp-title{ font-size:34px; color:#8a6a2e; margin-bottom:26px; font-family:var(--font-display); }
+#cert-print-only .cp-name{ font-size:28px; border-bottom:2px solid #333; padding:0 30px 12px; margin-bottom:26px; font-family:var(--font-display); }
+#cert-print-only .cp-line{ font-size:16px; color:#333; margin-bottom:8px; font-family:var(--font-display); }
+#cert-print-only .cp-sub{ font-family:var(--font-mono); font-size:12px; color:#777; margin-top:30px; letter-spacing:1px; }
+
+@media print{
+  body.cert-print-mode{ background:#fff; }
+  body.cert-print-mode .app{ display:none !important; }
+  body.cert-print-mode #cert-print-only{
+    display:flex !important; flex-direction:column; align-items:center; justify-content:center;
+    min-height:100vh; text-align:center; padding:60px 40px;
+  }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <nav class="sidebar" id="sidebar">
+    <div class="brand">
+      <svg viewBox="0 0 40 40" fill="none">
+        <path d="M12 15 C12 15 9 19 12 23 C15 27 25 27 28 23 C31 19 28 15 28 15" stroke="var(--accent)" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <ellipse cx="20" cy="15" rx="10" ry="3" fill="var(--surface-2)" stroke="var(--accent)" stroke-width="1.5"/>
+        <path id="steam1" d="M16 10 Q14 7 16 5" stroke="var(--teal)" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+        <path id="steam2" d="M22 10 Q24 6 21 4" stroke="var(--teal)" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+      </svg>
+      <div class="brand-text"><div class="t1">Learning Studio</div><div class="t2">Java · OOP Track</div></div>
+    </div>
+
+    <div class="nav-section-label">Tutorial</div>
+    <div class="nav-item active" data-target="intro"><span class="nav-dot">·</span> Introduction</div>
+    <div class="nav-item" data-target="m1"><span class="nav-dot">1</span> Foundations<span class="nav-badge" id="nb-m1"></span></div>
+    <div class="nav-item locked" data-target="m2"><span class="nav-dot">2</span> Inheritance<span class="nav-badge" id="nb-m2"></span></div>
+    <div class="nav-item locked" data-target="m3"><span class="nav-dot">3</span> Polymorphism<span class="nav-badge" id="nb-m3"></span></div>
+    <div class="nav-item locked" data-target="m4"><span class="nav-dot">4</span> Mastery<span class="nav-badge" id="nb-m4"></span></div>
+    <div class="nav-item locked" data-target="final"><span class="nav-dot">★</span> Final Challenge<span class="nav-badge" id="nb-final"></span></div>
+    <div class="nav-item" data-target="resources"><span class="nav-dot">→</span> Continue Learning</div>
+
+    <div class="sidebar-progress">
+      <div class="label"><span>Overall progress</span><span id="progress-pct">0%</span></div>
+      <div class="bar-track"><div class="bar-fill" id="progress-bar"></div></div>
+      <div class="xp-row"><span>⚡</span><span id="xp-count">0 XP</span><span style="margin-left:auto" id="badge-count">0 badges</span></div>
+    </div>
+
+    <div class="theme-toggle">
+      <span id="theme-label">🌙 Dark mode</span>
+      <button id="theme-btn">Switch</button>
+    </div>
+  </nav>
+
+  <!-- ===================== MAIN ===================== -->
+  <div class="main">
+    <div class="topbar">
+      <button class="menu-btn" id="menu-btn">☰ Menu</button>
+      <div class="crumbs" id="crumbs">Interactive Learning Studio / Java OOP</div>
+      <div class="topbar-progress"><div class="bar-track"><div class="bar-fill" id="progress-bar-top"></div></div></div>
+    </div>
+
+    <div class="content">
+
+      <!-- ============ INTRO ============ -->
+      <section id="intro" class="hero">
+        <div class="eyebrow">Programming &nbsp;/&nbsp; Java &nbsp;/&nbsp; Single-Tutorial Course</div>
+        <h1>Object-Oriented Programming <em>in Java</em></h1>
+        <p class="lede">A complete, self-contained tutorial on classes, objects, encapsulation, inheritance, polymorphism and abstraction — taught from first principles through to a working mini system you design yourself.</p>
+
+        <div class="meta-grid">
+          <div class="meta-card"><div class="k">Estimated time</div><div class="v">2.5 – 3 hrs</div></div>
+          <div class="meta-card"><div class="k">Modules</div><div class="v">4 + Final</div></div>
+          <div class="meta-card"><div class="k">Quizzes</div><div class="v">16 questions</div></div>
+          <div class="meta-card"><div class="k">Level</div><div class="v">Beginner → Intermediate</div></div>
+        </div>
+
+        <div class="box">
+          <h3>Prerequisites</h3>
+          <ul>
+            <li>Basic Java syntax: variables, data types, methods, and how to compile/run a <code>.java</code> file.</li>
+            <li>Comfort with <code>if</code>/<code>for</code> control flow — no prior OOP knowledge required.</li>
+          </ul>
+        </div>
+
+        <div class="box">
+          <h3>Learning objectives</h3>
+          <ul>
+            <li>Design classes with fields, constructors, and methods, and understand how objects are created from them.</li>
+            <li>Apply encapsulation to protect internal state using access modifiers and accessor methods.</li>
+            <li>Build class hierarchies with inheritance, and correctly use <code>super</code>, overriding, and constructor chaining.</li>
+            <li>Use polymorphism and abstraction — abstract classes and interfaces — to write flexible, extensible code.</li>
+            <li>Combine all four pillars to design a small, realistic multi-class Java system.</li>
+          </ul>
+        </div>
+
+        <div class="box">
+          <h3>Expected outcomes</h3>
+          <p style="margin:0">By the end you will be able to read almost any Java class diagram, explain why a design uses inheritance vs. composition, and confidently write your own class hierarchies that follow real-world Java conventions — the same conventions used in frameworks like Spring and Android.</p>
+        </div>
+
+        <div class="reward-box">
+          <div class="icon">🏆</div>
+          <div>
+            <div class="rt">Reward system</div>
+            <div class="rs">Earn XP for every quiz question, unlock a badge per module, and collect a printable completion certificate at the end. Progress is tracked live in the sidebar.</div>
+          </div>
+        </div>
+
+        <div style="margin-top:30px"><button class="btn" onclick="goTo('m1')">Begin Module 1 →</button></div>
+      </section>
+
+      <!-- ============ MODULE 1 ============ -->
+      <section id="m1" class="module">
+        <div class="module-head"><span class="num">MODULE 01 / 04</span><h2>Foundations — Classes, Objects &amp; Encapsulation</h2></div>
+        <div class="module-sub">Difficulty: ●○○○ Foundational</div>
+
+        <p>Every Java program is built from <strong>classes</strong> and <strong>objects</strong>. A class is a template — it defines what data an object holds and what it can do. An object is a concrete thing built from that template, living in memory with its own values.</p>
+
+        <div class="callout analogy"><span class="lab">Analogy</span>Think of a class as an architect's <strong>blueprint</strong> for a house. The blueprint isn't a house you can live in — it's a plan. Every actual house built from it (object) has its own address, paint color, and furniture, but they all share the same room layout defined by the blueprint.</div>
+
+        <h3 class="sec-h">Anatomy of a class</h3>
+        <pre><code><span class="tok-kw">public class</span> <span class="tok-type">Car</span> {
+    <span class="tok-com">// fields (state)</span>
+    <span class="tok-kw">private</span> <span class="tok-type">String</span> model;
+    <span class="tok-kw">private</span> <span class="tok-kw">int</span> speed;
+
+    <span class="tok-com">// constructor</span>
+    <span class="tok-kw">public</span> <span class="tok-fn">Car</span>(<span class="tok-type">String</span> model) {
+        <span class="tok-kw">this</span>.model = model;
+        <span class="tok-kw">this</span>.speed = <span class="tok-str">0</span>;
+    }
+
+    <span class="tok-com">// methods (behaviour)</span>
+    <span class="tok-kw">public void</span> <span class="tok-fn">accelerate</span>(<span class="tok-kw">int</span> amount) {
+        speed += amount;
+    }
+
+    <span class="tok-kw">public</span> <span class="tok-type">int</span> <span class="tok-fn">getSpeed</span>() {
+        <span class="tok-kw">return</span> speed;
+    }
+}</code></pre>
+
+        <div class="diagram-wrap">
+          <svg viewBox="0 0 640 260" xmlns="http://www.w3.org/2000/svg">
+            <defs><pattern id="grid1" width="18" height="18" patternUnits="userSpaceOnUse"><path d="M18 0H0V18" fill="none" stroke="var(--border-soft)" stroke-width="1"/></pattern></defs>
+            <rect width="640" height="260" fill="url(#grid1)"/>
+            <rect x="20" y="30" width="150" height="190" rx="6" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-dasharray="4 3"/>
+            <text x="95" y="52" text-anchor="middle" fill="var(--accent)" font-family="ui-monospace,monospace" font-size="13" font-weight="700">class Car</text>
+            <line x1="35" y1="60" x2="155" y2="60" stroke="var(--border)" />
+            <text x="35" y="80" fill="var(--text-dim)" font-family="ui-monospace,monospace" font-size="11">- model: String</text>
+            <text x="35" y="98" fill="var(--text-dim)" font-family="ui-monospace,monospace" font-size="11">- speed: int</text>
+            <line x1="35" y1="112" x2="155" y2="112" stroke="var(--border)" />
+            <text x="35" y="132" fill="var(--text-dim)" font-family="ui-monospace,monospace" font-size="11">+ accelerate()</text>
+            <text x="35" y="150" fill="var(--text-dim)" font-family="ui-monospace,monospace" font-size="11">+ getSpeed()</text>
+            <text x="95" y="205" text-anchor="middle" fill="var(--text-faint)" font-size="10" font-family="ui-monospace,monospace">BLUEPRINT</text>
+
+            <g>
+              <path d="M170 60 C 260 60, 260 60, 330 70" stroke="var(--teal)" stroke-width="1.3" fill="none" marker-end="url(#arrow1)"/>
+              <path d="M170 120 C 260 120, 260 120, 330 130" stroke="var(--teal)" stroke-width="1.3" fill="none" marker-end="url(#arrow1)"/>
+              <path d="M170 180 C 260 180, 260 180, 330 190" stroke="var(--teal)" stroke-width="1.3" fill="none" marker-end="url(#arrow1)"/>
+            </g>
+            <defs><marker id="arrow1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--teal)"/></marker></defs>
+
+            <g font-family="ui-monospace,monospace" font-size="11">
+              <rect x="335" y="45" width="130" height="55" rx="6" fill="var(--surface-2)" stroke="var(--border)"/>
+              <text x="400" y="63" text-anchor="middle" fill="var(--text)" font-weight="700">car1</text>
+              <text x="400" y="80" text-anchor="middle" fill="var(--text-faint)">model="Civic"</text>
+              <text x="400" y="94" text-anchor="middle" fill="var(--text-faint)">speed=0</text>
+
+              <rect x="335" y="105" width="130" height="55" rx="6" fill="var(--surface-2)" stroke="var(--border)"/>
+              <text x="400" y="123" text-anchor="middle" fill="var(--text)" font-weight="700">car2</text>
+              <text x="400" y="140" text-anchor="middle" fill="var(--text-faint)">model="Mustang"</text>
+              <text x="400" y="154" text-anchor="middle" fill="var(--text-faint)">speed=40</text>
+
+              <rect x="335" y="165" width="130" height="55" rx="6" fill="var(--surface-2)" stroke="var(--border)"/>
+              <text x="400" y="183" text-anchor="middle" fill="var(--text)" font-weight="700">car3</text>
+              <text x="400" y="200" text-anchor="middle" fill="var(--text-faint)">model="Model 3"</text>
+              <text x="400" y="214" text-anchor="middle" fill="var(--text-faint)">speed=15</text>
+            </g>
+            <text x="580" y="140" fill="var(--text-faint)" font-size="10" font-family="ui-monospace,monospace" transform="rotate(90 580 140)">OBJECTS</text>
+          </svg>
+          <div class="diagram-cap">One class → many independent objects, each with its own field values</div>
+        </div>
+
+        <h3 class="sec-h">Encapsulation: protecting state</h3>
+        <p>Fields marked <code>private</code> can't be touched directly from outside the class. Instead, we expose controlled access through <strong>public methods</strong> — commonly getters and setters. This lets the class validate or restrict changes to its own data.</p>
+
+        <div class="callout analogy"><span class="lab">Analogy</span>An <strong>ATM machine</strong> encapsulates your bank balance. You never reach into the vault and change the number yourself — you go through the machine's buttons (methods), and it decides whether your withdrawal is valid.</div>
+
+        <div class="diagram-wrap">
+          <svg viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+            <rect x="150" y="30" width="200" height="160" rx="14" fill="var(--surface-2)" stroke="var(--accent)" stroke-width="1.6" stroke-dasharray="5 3"/>
+            <text x="250" y="60" text-anchor="middle" fill="var(--accent)" font-family="ui-monospace,monospace" font-size="12" font-weight="700">private balance</text>
+            <text x="250" y="80" text-anchor="middle" fill="var(--text-faint)" font-family="ui-monospace,monospace" font-size="20">🔒</text>
+            <text x="250" y="120" text-anchor="middle" fill="var(--text-dim)" font-family="ui-monospace,monospace" font-size="11">state hidden inside</text>
+            <text x="250" y="140" text-anchor="middle" fill="var(--text-dim)" font-family="ui-monospace,monospace" font-size="11">the object</text>
+
+            <rect x="20" y="80" width="110" height="34" rx="6" fill="var(--surface)" stroke="var(--teal)"/>
+            <text x="75" y="101" text-anchor="middle" fill="var(--teal)" font-family="ui-monospace,monospace" font-size="11">+ deposit()</text>
+            <rect x="20" y="126" width="110" height="34" rx="6" fill="var(--surface)" stroke="var(--teal)"/>
+            <text x="75" y="147" text-anchor="middle" fill="var(--teal)" font-family="ui-monospace,monospace" font-size="11">+ withdraw()</text>
+            <line x1="130" y1="97" x2="150" y2="90" stroke="var(--teal)" stroke-width="1.3"/>
+            <line x1="130" y1="143" x2="150" y2="130" stroke="var(--teal)" stroke-width="1.3"/>
+
+            <rect x="370" y="103" width="110" height="34" rx="6" fill="var(--surface)" stroke="var(--teal)"/>
+            <text x="425" y="124" text-anchor="middle" fill="var(--teal)" font-family="ui-monospace,monospace" font-size="11">+ getBalance()</text>
+            <line x1="370" y1="120" x2="350" y2="110" stroke="var(--teal)" stroke-width="1.3"/>
+            <text x="250" y="205" text-anchor="middle" fill="var(--text-faint)" font-size="10" font-family="ui-monospace,monospace">ONLY THE METHODS ("API") ARE PUBLIC</text>
+          </svg>
+          <div class="diagram-cap">Public methods act as the only doorway into private state</div>
+        </div>
+
+        <h3 class="sec-h">Comparison: class vs. object</h3>
+        <table class="cmp">
+          <tr><th>Class</th><th>Object</th></tr>
+          <tr><td>A template / type definition, written once</td><td>A concrete instance created with <code>new</code></td></tr>
+          <tr><td>Exists at compile time, no memory for instance data</td><td>Exists at runtime, occupies heap memory</td></tr>
+          <tr><td>Example: <code>Car</code></td><td>Example: <code>Car civic = new Car("Civic");</code></td></tr>
+        </table>
+
+        <h3 class="sec-h">Practical exercise</h3>
+        <div class="exercise">
+          <span class="tag">Try it</span>
+          <p style="margin-top:10px">Write a <code>BankAccount</code> class with a private <code>double balance</code> field, a constructor that sets an initial balance, and public <code>deposit(double amount)</code> and <code>getBalance()</code> methods. Sketch it below (this is a thinking exercise — check your approach against the model answer).</p>
+          <textarea placeholder="public class BankAccount { ... }"></textarea>
+          <div class="reveal"><button class="btn secondary small" onclick="toggleReveal(this)">Show model answer</button>
+            <div class="reveal-body"><pre><code><span class="tok-kw">public class</span> <span class="tok-type">BankAccount</span> {
+    <span class="tok-kw">private double</span> balance;
+    <span class="tok-kw">public</span> <span class="tok-fn">BankAccount</span>(<span class="tok-kw">double</span> initial) { balance = initial; }
+    <span class="tok-kw">public void</span> <span class="tok-fn">deposit</span>(<span class="tok-kw">double</span> amount) { balance += amount; }
+    <span class="tok-kw">public double</span> <span class="tok-fn">getBalance</span>() { <span class="tok-kw">return</span> balance; }
+}</code></pre></div>
+          </div>
+        </div>
+
+        <div class="callout warn"><span class="lab">Common misconception</span>"A class and an object are the same thing." They're not — a class is never instantiated on its own; it's the plan. Also: making fields <code>public</code> "to make things easier" defeats encapsulation and is considered poor Java style outside of simple data carriers.</div>
+
+        <div class="takeaways">
+          <h3>Key takeaways</h3>
+          <ul>
+            <li>A class defines structure (fields) and behaviour (methods); an object is a live instance of it.</li>
+            <li><code>private</code> fields + public methods = encapsulation, Java's mechanism for information hiding.</li>
+            <li>Constructors initialize an object's state the moment it's created with <code>new</code>.</li>
+          </ul>
+        </div>
+      </section>
+
+      <div id="quiz-m1-anchor"></div>
+
+      <!-- ============ MODULE 2 ============ -->
+      <section id="m2" class="module">
+        <div class="module-head"><span class="num">MODULE 02 / 04</span><h2>Inheritance</h2></div>
+        <div class="module-sub">Difficulty: ●●○○ Building up</div>
+        <div class="lock-overlay" id="lock-m2"><div class="lk">🔒</div>Complete the Module 1 quiz to unlock Inheritance.</div>
+        <div id="body-m2" style="display:none">
+
+        <p>Inheritance lets one class (the <strong>subclass</strong>) acquire the fields and methods of another (the <strong>superclass</strong>) using <code>extends</code>. It models an <strong>"is-a"</strong> relationship: a <code>Dog</code> is an <code>Animal</code>.</p>
+
+        <div class="callout analogy"><span class="lab">Analogy</span>Think of a family tree. Children inherit traits from parents automatically (eye color, last name) but can also develop their own unique traits. A <code>Dog</code> inherits <code>eat()</code> and <code>sleep()</code> from <code>Animal</code>, but adds its own <code>bark()</code>.</div>
+
+        <pre><code><span class="tok-kw">public class</span> <span class="tok-type">Animal</span> {
+    <span class="tok-kw">protected</span> <span class="tok-type">String</span> name;
+    <span class="tok-kw">public</span> <span class="tok-fn">Animal</span>(<span class="tok-type">String</span> name) { <span class="tok-kw">this</span>.name = name; }
+    <span class="tok-kw">public void</span> <span class="tok-fn">eat</span>() { System.out.println(name + <span class="tok-str">" is eating"</span>); }
+}
+
+<span class="tok-kw">public class</span> <span class="tok-type">Dog</span> <span class="tok-kw">extends</span> <span class="tok-type">Animal</span> {
+    <span class="tok-kw">public</span> <span class="tok-fn">Dog</span>(<span class="tok-type">String</span> name) {
+        <span class="tok-kw">super</span>(name); <span class="tok-com">// calls Animal's constructor</span>
+    }
+    <span class="tok-kw">public void</span> <span class="tok-fn">bark</span>() { System.out.println(name + <span class="tok-str">" says Woof!"</span>); }
+
+    <span class="tok-com">// overriding: replace parent's behaviour</span>
+    <span class="tok-annotation">@Override</span>
+    <span class="tok-kw">public void</span> <span class="tok-fn">eat</span>() { System.out.println(name + <span class="tok-str">" wolfs down kibble"</span>); }
+}</code></pre>
+
+        <div class="diagram-wrap">
+          <svg viewBox="0 0 560 250" xmlns="http://www.w3.org/2000/svg">
+            <defs><pattern id="grid2" width="18" height="18" patternUnits="userSpaceOnUse"><path d="M18 0H0V18" fill="none" stroke="var(--border-soft)" stroke-width="1"/></pattern>
+            <marker id="arrowUp" markerWidth="10" markerHeight="10" refX="5" refY="8" orient="auto"><path d="M0,8 L5,0 L10,8 Z" fill="none" stroke="var(--teal)" stroke-width="1.4"/></marker></defs>
+            <rect width="560" height="250" fill="url(#grid2)"/>
+            <rect x="210" y="20" width="140" height="60" rx="6" fill="var(--surface-2)" stroke="var(--accent)" stroke-width="1.6"/>
+            <text x="280" y="45" text-anchor="middle" fill="var(--accent)" font-family="ui-monospace,monospace" font-size="12" font-weight="700">Animal</text>
+            <text x="280" y="65" text-anchor="middle" fill="var(--text-faint)" font-family="ui-monospace,monospace" font-size="10">eat(), sleep()</text>
+
+            <line x1="90" y1="160" x2="270" y2="82" stroke="var(--teal)" stroke-width="1.4" marker-end="url(#arrowUp)"/>
+            <line x1="470" y1="160" x2="290" y2="82" stroke="var(--teal)" stroke-width="1.4" marker-end="url(#arrowUp)"/>
+            <line x1="280" y1="160" x2="280" y2="82" stroke="var(--teal)" stroke-width="1.4" marker-end="url(#arrowUp)"/>
+
+            <rect x="20" y="160" width="140" height="60" rx="6" fill="var(--surface)" stroke="var(--border)"/>
+            <text x="90" y="185" text-anchor="middle" fill="var(--text)" font-family="ui-monospace,monospace" font-size="12" font-weight="700">Dog</text>
+            <text x="90" y="205" text-anchor="middle" fill="var(--text-faint)" font-family="ui-monospace,monospace" font-size="10">bark(), eat()†</text>
+
+            <rect x="210" y="160" width="140" height="60" rx="6" fill="var(--surface)" stroke="var(--border)"/>
+            <text x="280" y="185" text-anchor="middle" fill="var(--text)" font-family="ui-monospace,monospace" font-size="12" font-weight="700">Cat</text>
+            <text x="280" y="205" text-anchor="middle" fill="var(--text-faint)" font-family="ui-monospace,monospace" font-size="10">scratch(), eat()†</text>
+
+            <rect x="400" y="160" width="140" height="60" rx="6" fill="var(--surface)" stroke="var(--border)"/>
+            <text x="470" y="185" text-anchor="middle" fill="var(--text)" font-family="ui-monospace,monospace" font-size="12" font-weight="700">Bird</text>
+            <text x="470" y="205" text-anchor="middle" fill="var(--text-faint)" font-family="ui-monospace,monospace" font-size="10">fly(), eat()†</text>
+
+            <text x="280" y="240" text-anchor="middle" fill="var(--text-faint)" font-size="10" font-family="ui-monospace,monospace">arrows point up = "extends" · † = overridden</text>
+          </svg>
+          <div class="diagram-cap">A superclass at the top, subclasses below — each "is-a" Animal</div>
+        </div>
+
+        <h3 class="sec-h">Overriding vs. overloading</h3>
+        <table class="cmp">
+          <tr><th>Overriding</th><th>Overloading</th></tr>
+          <tr><td>Same method signature, redefined in a subclass</td><td>Same method name, different parameter list, same class</td></tr>
+          <tr><td>Resolved at <strong>runtime</strong> (dynamic dispatch)</td><td>Resolved at <strong>compile time</strong></td></tr>
+          <tr><td>Requires inheritance</td><td>No inheritance needed</td></tr>
+          <tr><td><code>@Override public void eat()</code></td><td><code>void feed(); void feed(int qty);</code></td></tr>
+        </table>
+
+        <h3 class="sec-h">Practical exercise</h3>
+        <div class="exercise">
+          <span class="tag">Try it</span>
+          <p style="margin-top:10px">Create a <code>Cat</code> subclass of <code>Animal</code> that overrides <code>eat()</code> to print <code>"&lt;name&gt; sips milk"</code>, and adds a new method <code>scratch()</code>.</p>
+          <textarea placeholder="public class Cat extends Animal { ... }"></textarea>
+          <div class="reveal"><button class="btn secondary small" onclick="toggleReveal(this)">Show model answer</button>
+            <div class="reveal-body"><pre><code><span class="tok-kw">public class</span> <span class="tok-type">Cat</span> <span class="tok-kw">extends</span> <span class="tok-type">Animal</span> {
+    <span class="tok-kw">public</span> <span class="tok-fn">Cat</span>(<span class="tok-type">String</span> name) { <span class="tok-kw">super</span>(name); }
+    <span class="tok-annotation">@Override</span>
+    <span class="tok-kw">public void</span> <span class="tok-fn">eat</span>() { System.out.println(name + <span class="tok-str">" sips milk"</span>); }
+    <span class="tok-kw">public void</span> <span class="tok-fn">scratch</span>() { System.out.println(name + <span class="tok-str">" scratches the post"</span>); }
+}</code></pre></div>
+          </div>
+        </div>
+
+        <div class="callout warn"><span class="lab">Common misconception</span>"Java supports multiple inheritance of classes." It doesn't — a class can only <code>extends</code> one superclass (to avoid the "diamond problem"). Multiple inheritance of <em>behaviour</em> is achieved through interfaces instead, covered in the next module.</div>
+
+        <div class="takeaways">
+          <h3>Key takeaways</h3>
+          <ul>
+            <li><code>extends</code> creates an is-a relationship and reuses code from the superclass.</li>
+            <li><code>super(...)</code> calls the parent constructor; it must be the first line if used.</li>
+            <li>Overriding changes behaviour polymorphically; overloading just adds variants of a method name.</li>
+          </ul>
+        </div>
+        </div>
+      </section>
+
+      <div id="quiz-m2-anchor"></div>
+
+      <!-- ============ MODULE 3 ============ -->
+      <section id="m3" class="module">
+        <div class="module-head"><span class="num">MODULE 03 / 04</span><h2>Polymorphism &amp; Abstraction</h2></div>
+        <div class="module-sub">Difficulty: ●●●○ Advanced concepts</div>
+        <div class="lock-overlay" id="lock-m3"><div class="lk">🔒</div>Complete the Module 2 quiz to unlock Polymorphism.</div>
+        <div id="body-m3" style="display:none">
+
+        <p><strong>Polymorphism</strong> ("many forms") lets you treat different subclasses through a single, shared type — and have the correct, specific behaviour run automatically at runtime. <strong>Abstraction</strong> is how we define that shared type without fully implementing it, using <code>abstract</code> classes or <code>interface</code>s.</p>
+
+        <div class="callout analogy"><span class="lab">Analogy</span>A universal TV remote has one "power" button (the shared interface), but pressing it triggers a different internal circuit depending on whether it's plugged into a Samsung or an LG TV. You don't need to know the brand — you just press the button and the right thing happens.</div>
+
+        <pre><code><span class="tok-kw">interface</span> <span class="tok-type">Shape</span> {
+    <span class="tok-kw">double</span> <span class="tok-fn">area</span>(); <span class="tok-com">// no body — a contract</span>
+}
+
+<span class="tok-kw">class</span> <span class="tok-type">Circle</span> <span class="tok-kw">implements</span> <span class="tok-type">Shape</span> {
+    <span class="tok-kw">private double</span> r;
+    <span class="tok-fn">Circle</span>(<span class="tok-kw">double</span> r) { <span class="tok-kw">this</span>.r = r; }
+    <span class="tok-kw">public double</span> <span class="tok-fn">area</span>() { <span class="tok-kw">return</span> Math.PI * r * r; }
+}
+
+<span class="tok-kw">class</span> <span class="tok-type">Square</span> <span class="tok-kw">implements</span> <span class="tok-type">Shape</span> {
+    <span class="tok-kw">private double</span> side;
+    <span class="tok-fn">Square</span>(<span class="tok-kw">double</span> side) { <span class="tok-kw">this</span>.side = side; }
+    <span class="tok-kw">public double</span> <span class="tok-fn">area</span>() { <span class="tok-kw">return</span> side * side; }
+}
+
+<span class="tok-com">// polymorphism in action:</span>
+<span class="tok-type">Shape</span>[] shapes = { <span class="tok-kw">new</span> <span class="tok-fn">Circle</span>(<span class="tok-str">2</span>), <span class="tok-kw">new</span> <span class="tok-fn">Square</span>(<span class="tok-str">3</span>) };
+<span class="tok-kw">for</span> (<span class="tok-type">Shape</span> s : shapes) {
+    System.out.println(s.area()); <span class="tok-com">// correct area() runs for each</span>
+}</code></pre>
+
+        <div class="diagram-wrap">
+          <svg viewBox="0 0 560 230" xmlns="http://www.w3.org/2000/svg">
+            <defs><marker id="arrowDash" markerWidth="10" markerHeight="10" refX="5" refY="8" orient="auto"><path d="M0,8 L5,0 L10,8 Z" fill="none" stroke="var(--accent)" stroke-width="1.4"/></marker></defs>
+            <rect x="210" y="20" width="140" height="50" rx="6" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-dasharray="4 3"/>
+            <text x="280" y="42" text-anchor="middle" fill="var(--accent)" font-family="ui-monospace,monospace" font-size="12" font-weight="700">«interface» Shape</text>
+            <text x="280" y="58" text-anchor="middle" fill="var(--text-faint)" font-family="ui-monospace,monospace" font-size="10">area()</text>
+
+            <line x1="90" y1="150" x2="270" y2="72" stroke="var(--accent)" stroke-width="1.3" stroke-dasharray="3 3" marker-end="url(#arrowDash)"/>
+            <line x1="280" y1="150" x2="280" y2="72" stroke="var(--accent)" stroke-width="1.3" stroke-dasharray="3 3" marker-end="url(#arrowDash)"/>
+            <line x1="470" y1="150" x2="290" y2="72" stroke="var(--accent)" stroke-width="1.3" stroke-dasharray="3 3" marker-end="url(#arrowDash)"/>
+
+            <rect x="20" y="150" width="140" height="50" rx="6" fill="var(--surface)" stroke="var(--border)"/>
+            <text x="90" y="180" text-anchor="middle" fill="var(--text)" font-family="ui-monospace,monospace" font-size="12">Circle</text>
+            <rect x="210" y="150" width="140" height="50" rx="6" fill="var(--surface)" stroke="var(--border)"/>
+            <text x="280" y="180" text-anchor="middle" fill="var(--text)" font-family="ui-monospace,monospace" font-size="12">Square</text>
+            <rect x="400" y="150" width="140" height="50" rx="6" fill="var(--surface)" stroke="var(--border)"/>
+            <text x="470" y="180" text-anchor="middle" fill="var(--text)" font-family="ui-monospace,monospace" font-size="12">Triangle</text>
+
+            <text x="280" y="220" text-anchor="middle" fill="var(--text-faint)" font-size="10" font-family="ui-monospace,monospace">dashed arrows = "implements" · each supplies its own area()</text>
+          </svg>
+          <div class="diagram-cap">One reference type, many runtime implementations — dynamic dispatch</div>
+        </div>
+
+        <h3 class="sec-h">Abstract class vs. interface</h3>
+        <table class="cmp">
+          <tr><th>Abstract class</th><th>Interface</th></tr>
+          <tr><td>Can hold fields, constructors, and partially implemented methods</td><td>Traditionally only method signatures (Java 8+ allows default methods)</td></tr>
+          <tr><td>A subclass can extend only <strong>one</strong> abstract class</td><td>A class can <code>implements</code> <strong>many</strong> interfaces</td></tr>
+          <tr><td>Use when subclasses share common code/state</td><td>Use to define a capability/contract across unrelated classes</td></tr>
+          <tr><td><code>abstract class Animal { abstract void sound(); }</code></td><td><code>interface Flyable { void fly(); }</code></td></tr>
+        </table>
+
+        <h3 class="sec-h">Practical exercise</h3>
+        <div class="exercise">
+          <span class="tag">Try it</span>
+          <p style="margin-top:10px">Add a <code>Triangle</code> class implementing <code>Shape</code>, with a constructor taking <code>base</code> and <code>height</code>, computing <code>area()</code> as <code>0.5 * base * height</code>.</p>
+          <textarea placeholder="class Triangle implements Shape { ... }"></textarea>
+          <div class="reveal"><button class="btn secondary small" onclick="toggleReveal(this)">Show model answer</button>
+            <div class="reveal-body"><pre><code><span class="tok-kw">class</span> <span class="tok-type">Triangle</span> <span class="tok-kw">implements</span> <span class="tok-type">Shape</span> {
+    <span class="tok-kw">private double</span> base, height;
+    <span class="tok-fn">Triangle</span>(<span class="tok-kw">double</span> base, <span class="tok-kw">double</span> height) {
+        <span class="tok-kw">this</span>.base = base; <span class="tok-kw">this</span>.height = height;
+    }
+    <span class="tok-kw">public double</span> <span class="tok-fn">area</span>() { <span class="tok-kw">return</span> <span class="tok-str">0.5</span> * base * height; }
+}</code></pre></div>
+          </div>
+        </div>
+
+        <div class="callout warn"><span class="lab">Common misconception</span>"Polymorphism just means method overloading." Overloading is compile-time convenience; true polymorphism is about a single reference type (interface or superclass) dispatching to different runtime behaviour — that's what makes designs extensible without <code>if/else</code> chains on type.</div>
+
+        <div class="takeaways">
+          <h3>Key takeaways</h3>
+          <ul>
+            <li>Polymorphism lets code depend on an abstraction (interface/superclass) instead of concrete classes.</li>
+            <li>Interfaces define "can-do" capabilities; abstract classes define "is-a" families with shared code.</li>
+            <li>Dynamic dispatch means the JVM picks the correct overridden method at runtime, based on the object's real type.</li>
+          </ul>
+        </div>
+        </div>
+      </section>
+
+      <div id="quiz-m3-anchor"></div>
+
+      <!-- ============ MODULE 4 ============ -->
+      <section id="m4" class="module">
+        <div class="module-head"><span class="num">MODULE 04 / 04</span><h2>Mastery — Designing a Real System</h2></div>
+        <div class="module-sub">Difficulty: ●●●● Practical application</div>
+        <div class="lock-overlay" id="lock-m4"><div class="lk">🔒</div>Complete the Module 3 quiz to unlock Mastery.</div>
+        <div id="body-m4" style="display:none">
+
+        <p>Real Java systems combine all four pillars at once. Let's design a tiny banking system: an <code>abstract class Account</code> holding shared state and behaviour, two concrete subclasses with different rules, and a <code>Transactable</code> interface so unrelated classes can share a capability.</p>
+
+        <pre><code><span class="tok-kw">interface</span> <span class="tok-type">Transactable</span> {
+    <span class="tok-kw">void</span> <span class="tok-fn">withdraw</span>(<span class="tok-kw">double</span> amount);
+}
+
+<span class="tok-kw">abstract class</span> <span class="tok-type">Account</span> <span class="tok-kw">implements</span> <span class="tok-type">Transactable</span> {
+    <span class="tok-kw">protected double</span> balance;
+    <span class="tok-kw">protected</span> <span class="tok-fn">Account</span>(<span class="tok-kw">double</span> balance) { <span class="tok-kw">this</span>.balance = balance; }
+    <span class="tok-kw">public double</span> <span class="tok-fn">getBalance</span>() { <span class="tok-kw">return</span> balance; }
+    <span class="tok-kw">public abstract double</span> <span class="tok-fn">interestRate</span>();  <span class="tok-com">// no shared answer</span>
+}
+
+<span class="tok-kw">class</span> <span class="tok-type">SavingsAccount</span> <span class="tok-kw">extends</span> <span class="tok-type">Account</span> {
+    <span class="tok-fn">SavingsAccount</span>(<span class="tok-kw">double</span> balance) { <span class="tok-kw">super</span>(balance); }
+    <span class="tok-kw">public double</span> <span class="tok-fn">interestRate</span>() { <span class="tok-kw">return</span> <span class="tok-str">0.03</span>; }
+    <span class="tok-kw">public void</span> <span class="tok-fn">withdraw</span>(<span class="tok-kw">double</span> amount) {
+        <span class="tok-kw">if</span> (amount &lt;= balance) balance -= amount;
+    }
+}
+
+<span class="tok-kw">class</span> <span class="tok-type">CurrentAccount</span> <span class="tok-kw">extends</span> <span class="tok-type">Account</span> {
+    <span class="tok-fn">CurrentAccount</span>(<span class="tok-kw">double</span> balance) { <span class="tok-kw">super</span>(balance); }
+    <span class="tok-kw">public double</span> <span class="tok-fn">interestRate</span>() { <span class="tok-kw">return</span> <span class="tok-str">0.0</span>; }
+    <span class="tok-kw">public void</span> <span class="tok-fn">withdraw</span>(<span class="tok-kw">double</span> amount) {
+        balance -= amount; <span class="tok-com">// overdraft allowed</span>
+    }
+}</code></pre>
+
+        <div class="diagram-wrap">
+          <svg viewBox="0 0 560 250" xmlns="http://www.w3.org/2000/svg">
+            <defs><marker id="a2" markerWidth="10" markerHeight="10" refX="5" refY="8" orient="auto"><path d="M0,8 L5,0 L10,8 Z" fill="none" stroke="var(--teal)" stroke-width="1.4"/></marker></defs>
+            <rect x="360" y="18" width="160" height="46" rx="6" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-dasharray="4 3"/>
+            <text x="440" y="46" text-anchor="middle" fill="var(--accent)" font-family="ui-monospace,monospace" font-size="11" font-weight="700">«interface» Transactable</text>
+
+            <rect x="190" y="90" width="180" height="60" rx="6" fill="var(--surface-2)" stroke="var(--border)"/>
+            <text x="280" y="112" text-anchor="middle" fill="var(--text)" font-family="ui-monospace,monospace" font-size="12" font-weight="700">abstract Account</text>
+            <text x="280" y="130" text-anchor="middle" fill="var(--text-faint)" font-family="ui-monospace,monospace" font-size="10">balance, interestRate()</text>
+            <line x1="370" y1="105" x2="440" y2="64" stroke="var(--accent)" stroke-width="1.2" stroke-dasharray="3 3" marker-end="url(#a2)"/>
+
+            <line x1="120" y1="220" x2="260" y2="152" stroke="var(--teal)" stroke-width="1.4" marker-end="url(#a2)"/>
+            <line x1="440" y1="220" x2="310" y2="152" stroke="var(--teal)" stroke-width="1.4" marker-end="url(#a2)"/>
+
+            <rect x="40" y="220" width="160" height="24" rx="5" fill="var(--surface)" stroke="var(--border)"/>
+            <text x="120" y="237" text-anchor="middle" fill="var(--text)" font-family="ui-monospace,monospace" font-size="11">SavingsAccount</text>
+            <rect x="360" y="220" width="160" height="24" rx="5" fill="var(--surface)" stroke="var(--border)"/>
+            <text x="440" y="237" text-anchor="middle" fill="var(--text)" font-family="ui-monospace,monospace" font-size="11">CurrentAccount</text>
+          </svg>
+          <div class="diagram-cap">Abstraction (interface) + inheritance (abstract class) + polymorphism (interestRate) + encapsulation (balance) — all four pillars, one design</div>
+        </div>
+
+        <h3 class="sec-h">Design principle: composition over inheritance</h3>
+        <p>Not every relationship should be "is-a". If a class merely <em>uses</em> another (a <code>Car</code> "has-a" <code>Engine</code>), prefer holding a reference to that object (composition) instead of extending it. This keeps hierarchies shallow and avoids fragile, deeply-nested class trees — a widely used guideline in production Java codebases.</p>
+
+        <table class="cmp">
+          <tr><th>Inheritance ("is-a")</th><th>Composition ("has-a")</th></tr>
+          <tr><td><code>class Dog extends Animal</code></td><td><code>class Car { private Engine engine; }</code></td></tr>
+          <tr><td>Tightly coupled to parent's implementation</td><td>Loosely coupled — engine can be swapped freely</td></tr>
+          <tr><td>Good for genuine type hierarchies</td><td>Good for reusable, flexible behaviour</td></tr>
+        </table>
+
+        <h3 class="sec-h">Practical exercise</h3>
+        <div class="exercise">
+          <span class="tag">Try it</span>
+          <p style="margin-top:10px">Add a third account type, <code>FixedDepositAccount</code>, with a 5% interest rate and a <code>withdraw()</code> that always throws (no early withdrawal). Sketch the class.</p>
+          <textarea placeholder="class FixedDepositAccount extends Account { ... }"></textarea>
+          <div class="reveal"><button class="btn secondary small" onclick="toggleReveal(this)">Show model answer</button>
+            <div class="reveal-body"><pre><code><span class="tok-kw">class</span> <span class="tok-type">FixedDepositAccount</span> <span class="tok-kw">extends</span> <span class="tok-type">Account</span> {
+    <span class="tok-fn">FixedDepositAccount</span>(<span class="tok-kw">double</span> balance) { <span class="tok-kw">super</span>(balance); }
+    <span class="tok-kw">public double</span> <span class="tok-fn">interestRate</span>() { <span class="tok-kw">return</span> <span class="tok-str">0.05</span>; }
+    <span class="tok-kw">public void</span> <span class="tok-fn">withdraw</span>(<span class="tok-kw">double</span> amount) {
+        <span class="tok-kw">throw new</span> <span class="tok-fn">UnsupportedOperationException</span>(<span class="tok-str">"Locked until maturity"</span>);
+    }
+}</code></pre></div>
+          </div>
+        </div>
+
+        <div class="callout warn"><span class="lab">Common misconception</span>"More inheritance = more reuse = better design." Deep hierarchies often become rigid and hard to change. Senior Java developers default to composition and use inheritance only when the "is-a" test genuinely holds and subclasses truly share behaviour.</div>
+
+        <div class="takeaways">
+          <h3>Key takeaways</h3>
+          <ul>
+            <li>Real designs combine encapsulation, inheritance, polymorphism, and abstraction together.</li>
+            <li>Interfaces model capabilities; abstract classes model shared identity and partial implementation.</li>
+            <li>Prefer composition when the relationship is "has-a" rather than "is-a".</li>
+          </ul>
+        </div>
+        </div>
+      </section>
+
+      <div id="quiz-m4-anchor"></div>
+
+      <!-- ============ FINAL CHALLENGE ============ -->
+      <section id="final" class="module">
+        <div class="module-head"><span class="num">FINAL</span><h2>Final Practical Challenge</h2></div>
+        <div class="lock-overlay" id="lock-final"><div class="lk">🔒</div>Complete the Mastery quiz to unlock the final challenge.</div>
+        <div id="body-final" style="display:none">
+        <p>You're designing a small media-player system. Answer each design question — this checks whether you can apply all four pillars, not just recall definitions.</p>
+        <div class="quiz" id="quiz-final"></div>
+
+        <h3 class="sec-h" style="margin-top:50px">Cheat sheet</h3>
+        <div class="cheat-grid">
+          <div class="cheat-card"><h4>Class &amp; object</h4><pre><code><span class="tok-kw">class</span> <span class="tok-type">X</span> { <span class="tok-kw">private int</span> f; }
+<span class="tok-type">X</span> obj = <span class="tok-kw">new</span> <span class="tok-fn">X</span>();</code></pre></div>
+          <div class="cheat-card"><h4>Encapsulation</h4><pre><code><span class="tok-kw">private int</span> f;
+<span class="tok-kw">public int</span> <span class="tok-fn">getF</span>(){<span class="tok-kw">return</span> f;}</code></pre></div>
+          <div class="cheat-card"><h4>Inheritance</h4><pre><code><span class="tok-kw">class</span> <span class="tok-type">B</span> <span class="tok-kw">extends</span> <span class="tok-type">A</span> {
+  <span class="tok-fn">B</span>(){ <span class="tok-kw">super</span>(); }
+}</code></pre></div>
+          <div class="cheat-card"><h4>Interface</h4><pre><code><span class="tok-kw">interface</span> <span class="tok-type">I</span> { <span class="tok-kw">void</span> m(); }
+<span class="tok-kw">class</span> <span class="tok-type">C</span> <span class="tok-kw">implements</span> <span class="tok-type">I</span> {...}</code></pre></div>
+          <div class="cheat-card"><h4>Abstract class</h4><pre><code><span class="tok-kw">abstract class</span> <span class="tok-type">A</span> {
+  <span class="tok-kw">abstract void</span> m();
+}</code></pre></div>
+          <div class="cheat-card"><h4>Overriding</h4><pre><code><span class="tok-annotation">@Override</span>
+<span class="tok-kw">public void</span> <span class="tok-fn">m</span>(){...}</code></pre></div>
+        </div>
+
+        <h3 class="sec-h">Summary notes</h3>
+        <div class="box">
+          <ul>
+            <li><strong>Encapsulation</strong> — hide state behind private fields and public methods.</li>
+            <li><strong>Inheritance</strong> — reuse and specialize behaviour via <code>extends</code> and <code>super</code>.</li>
+            <li><strong>Polymorphism</strong> — one type, many runtime behaviours, resolved via dynamic dispatch.</li>
+            <li><strong>Abstraction</strong> — define contracts (<code>interface</code>) or partial templates (<code>abstract class</code>) without full implementation.</li>
+            <li><strong>Composition over inheritance</strong> — favour "has-a" object references over deep class trees when there's no genuine "is-a" relationship.</li>
+          </ul>
+        </div>
+
+        <div class="certificate">
+          <div class="cert-title">🏆 Certificate of Completion</div>
+          <div class="cert-name"><input type="text" id="cert-name-input" placeholder="Type your name"></div>
+          <p style="margin:0">has completed <strong>Object-Oriented Programming in Java</strong><br>Interactive Learning Studio</p>
+          <div style="margin-top:18px"><button class="btn secondary small" onclick="printCertificate()">🖨 Print certificate</button></div>
+        </div>
+        </div>
+      </section>
+
+      <!-- ============ RESOURCES ============ -->
+      <section id="resources" class="module">
+        <div class="module-head"><span class="num">→</span><h2>Continue Learning</h2></div>
+        <div class="res-grid">
+          <div class="res-card"><h4>Books</h4><ul>
+            <li><em>Effective Java</em> — Joshua Bloch</li>
+            <li><em>Head First Java</em> — Sierra &amp; Bates</li>
+            <li><em>Core Java, Vol. I</em> — Cay Horstmann</li>
+            <li><em>Design Patterns</em> — Gamma, Helm, Johnson, Vlissides (GoF)</li>
+          </ul></div>
+          <div class="res-card"><h4>Documentation</h4><ul>
+            <li>Oracle Java Language Specification — chapters on Classes &amp; Interfaces</li>
+            <li>Oracle "Learning the Java Language" tutorial trail</li>
+            <li>Java SE API docs (java.lang package)</li>
+          </ul></div>
+          <div class="res-card"><h4>Research &amp; foundational papers</h4><ul>
+            <li>Cardelli &amp; Wegner, <em>"On Understanding Types, Data Abstraction, and Polymorphism"</em> (1985)</li>
+            <li>Cook et al., <em>"Inheritance Is Not Subtyping"</em> (1990)</li>
+            <li>Gamma et al., original Design Patterns paper on object composition</li>
+          </ul></div>
+          <div class="res-card"><h4>Communities</h4><ul>
+            <li>r/learnjava and r/java on Reddit</li>
+            <li>Stack Overflow — <code>[java] [oop]</code> tags</li>
+            <li>Baeldung Java community articles</li>
+            <li>DEV.to #java tag</li>
+          </ul></div>
+          <div class="res-card"><h4>Practice platforms</h4><ul>
+            <li>LeetCode (Java track)</li>
+            <li>HackerRank Java domain</li>
+            <li>Codewars Java kata</li>
+            <li>Exercism Java track</li>
+          </ul></div>
+          <div class="res-card"><h4>Search keywords</h4><div class="kw-tags">
+            <span class="kw-tag">java inheritance vs composition</span>
+            <span class="kw-tag">java abstract class vs interface</span>
+            <span class="kw-tag">dynamic method dispatch java</span>
+            <span class="kw-tag">SOLID principles java</span>
+            <span class="kw-tag">java encapsulation best practices</span>
+          </div></div>
+        </div>
+
+        <h3 class="sec-h">Additional AI prompts for further learning</h3>
+        <div class="box">
+          <ul>
+            <li>"Explain Java's SOLID principles with a code example for each, building on the BankAccount system from this tutorial."</li>
+            <li>"Show me how the Factory design pattern uses polymorphism, using a Shape or Account hierarchy."</li>
+            <li>"Compare Java interfaces with default methods (Java 8+) to abstract classes — when should I use each?"</li>
+            <li>"Walk me through common Java OOP interview questions with model answers."</li>
+            <li>"Refactor this class hierarchy to favor composition over inheritance, and explain the tradeoffs."</li>
+          </ul>
+        </div>
+
+        <footer class="done-footer">Interactive Learning Studio · Java OOP Track · Built for deep, self-paced mastery</footer>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<!-- Hidden view used only when printing the certificate (kept OUTSIDE .app so it isn't hidden alongside it) -->
+<div id="cert-print-only">
+  <div class="cp-eyebrow">Interactive Learning Studio</div>
+  <div class="cp-title">🏆 Certificate of Completion</div>
+  <div class="cp-name" id="cp-name-out">Your Name</div>
+  <div class="cp-line">has successfully completed</div>
+  <div class="cp-line" style="font-weight:700">Object-Oriented Programming in Java</div>
+  <div class="cp-sub" id="cp-date-out"></div>
+</div>
+
+<script>
+/* ================= STATE ================= */
+const state = {
+  xp:0,
+  modules:{ m1:{done:false,score:0}, m2:{done:false,score:0}, m3:{done:false,score:0}, m4:{done:false,score:0}, final:{done:false,score:0} },
+  badges:0
+};
+const TOTAL_STEPS = 6; // 4 modules + final + resources visited implicit
+function computeOverall(){
+  let done = Object.values(state.modules).filter(m=>m.done).length;
+  return Math.round((done/5)*100);
+}
+function refreshProgressUI(){
+  const pct = computeOverall();
+  document.getElementById('progress-bar').style.width = pct+'%';
+  document.getElementById('progress-bar-top').style.width = pct+'%';
+  document.getElementById('progress-pct').textContent = pct+'%';
+  document.getElementById('xp-count').textContent = state.xp+' XP';
+  document.getElementById('badge-count').textContent = state.badges+' badges';
+}
+refreshProgressUI();
+
+/* ================= NAV ================= */
+const navItems = document.querySelectorAll('.nav-item[data-target]');
+navItems.forEach(item=>{
+  item.addEventListener('click', ()=>{
+    if(item.classList.contains('locked')) return;
+    goTo(item.dataset.target);
+  });
+});
+function goTo(id){
+  document.getElementById(id).scrollIntoView({behavior:'smooth'});
+  navItems.forEach(n=>n.classList.toggle('active', n.dataset.target===id));
+  document.getElementById('crumbs').textContent = 'Interactive Learning Studio / '+id.toUpperCase();
+  if(window.innerWidth<=900) document.getElementById('sidebar').classList.remove('open');
+}
+document.getElementById('menu-btn').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('open'));
+
+/* scroll spy (simple) */
+const sections = ['intro','m1','m2','m3','m4','final','resources'];
+window.addEventListener('scroll', ()=>{
+  let current = sections[0];
+  for(const id of sections){
+    const el = document.getElementById(id);
+    if(el && el.getBoundingClientRect().top < 140) current = id;
+  }
+  navItems.forEach(n=>n.classList.toggle('active', n.dataset.target===current));
+});
+
+/* ================= THEME ================= */
+const themeBtn = document.getElementById('theme-btn');
+const themeLabel = document.getElementById('theme-label');
+themeBtn.addEventListener('click', ()=>{
+  const isLight = document.documentElement.getAttribute('data-theme')==='light';
+  document.documentElement.setAttribute('data-theme', isLight? '' : 'light');
+  themeLabel.textContent = isLight? '🌙 Dark mode' : '☀️ Light mode';
+});
+
+/* ================= EXERCISE REVEAL ================= */
+function toggleReveal(btn){
+  const body = btn.nextElementSibling;
+  body.classList.toggle('show');
+  btn.textContent = body.classList.contains('show') ? 'Hide model answer' : 'Show model answer';
+}
+
+/* ================= CERTIFICATE PRINT ================= */
+function printCertificate(){
+  const name = document.getElementById('cert-name-input').value.trim() || 'Your Name';
+  document.getElementById('cp-name-out').textContent = name;
+  document.getElementById('cp-date-out').textContent = 'Completed on ' + new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
+  document.body.classList.add('cert-print-mode');
+  // Give the browser a frame to apply the print-mode styles before invoking print.
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      window.print();
+      // Fallback cleanup in case 'afterprint' doesn't fire in this browser.
+      setTimeout(()=>{ document.body.classList.remove('cert-print-mode'); }, 1500);
+    });
+  });
+}
+window.addEventListener('afterprint', ()=>{
+  document.body.classList.remove('cert-print-mode');
+});
+
+/* ================= QUIZ ENGINE ================= */
+const quizData = {
+  m1:{ title:'Module 1 Check — Foundations', unlockNext:'m2', lockEl:'lock-m2', bodyEl:'body-m2', navTarget:'m2', badgeEl:'nb-m1',
+    questions:[
+      {q:'What best describes a class in Java?', opts:['A running instance in memory','A blueprint/template defining fields and methods','A private variable','A compiled .class bytecode only'], correct:1, exp:'A class is the template; objects are the instances created from it at runtime.'},
+      {q:'Which keyword creates a new object from a class?', opts:['class','new','extends','this'], correct:1, exp:'`new` allocates memory and invokes the constructor to build an object instance.'},
+      {q:'Why mark a field as private and expose a getter instead?', opts:['It runs faster','It hides internal state so it can be validated/controlled (encapsulation)','Private fields use less memory','Java requires all fields to be private'], correct:1, exp:'Encapsulation protects internal state — the class controls how (and whether) its data can be read or changed.'},
+      {q:'What runs automatically when you write `new Car("Civic")`?', opts:['The getSpeed() method','The Car constructor','The main method','Nothing, you must call init() manually'], correct:1, exp:'The matching constructor executes immediately to initialize the new object\'s fields.'}
+    ]},
+  m2:{ title:'Module 2 Check — Inheritance', unlockNext:'m3', lockEl:'lock-m3', bodyEl:'body-m3', navTarget:'m3', badgeEl:'nb-m2',
+    questions:[
+      {q:'What relationship does `class Dog extends Animal` model?', opts:['has-a','is-a','uses-a','none'], correct:1, exp:'`extends` models an "is-a" relationship — a Dog is a specific kind of Animal.'},
+      {q:'What must `super(...)` be, if used in a constructor?', opts:['The last statement','Anywhere in the constructor','The first statement','Called only in the superclass'], correct:2, exp:'A call to `super(...)` must be the first statement in a subclass constructor.'},
+      {q:'How many classes can a Java class directly extend?', opts:['Unlimited','Exactly one','Two','Zero, extends is optional only'], correct:1, exp:'Java classes support single inheritance only — one direct superclass — to avoid the diamond problem.'},
+      {q:'Overloading is resolved…', opts:['At runtime, based on object type','At compile time, based on parameter list', 'Randomly by the JVM','Only for constructors'], correct:1, exp:'Overloading is a compile-time decision based on the method\'s parameter types/count; overriding is resolved at runtime.'}
+    ]},
+  m3:{ title:'Module 3 Check — Polymorphism & Abstraction', unlockNext:'m4', lockEl:'lock-m4', bodyEl:'body-m4', navTarget:'m4', badgeEl:'nb-m3',
+    questions:[
+      {q:'A `Shape[]` array holding `Circle` and `Square` objects, each calling `.area()`, demonstrates…', opts:['Overloading','Encapsulation','Polymorphism','Constructor chaining'], correct:2, exp:'Each object runs its own area() implementation through the same Shape reference type — classic runtime polymorphism.'},
+      {q:'How many interfaces can a single class implement?', opts:['Only one','Zero','Multiple', 'Exactly two'], correct:2, exp:'Unlike classes, a Java class can implement any number of interfaces — this is how Java achieves "multiple inheritance" of capability.'},
+      {q:'An abstract class differs from an interface mainly because it can…', opts:['Never have methods','Hold fields, constructors, and partially implemented methods','Only be extended once total in the whole program','Not be inherited at all'], correct:1, exp:'Abstract classes can carry shared state (fields), constructors, and concrete method bodies alongside abstract ones.'},
+      {q:'What decides which overridden method actually runs at runtime?', opts:['The declared/reference type of the variable','The actual runtime type of the object','The order of methods in the file','The compiler picks arbitrarily'], correct:1, exp:'Dynamic dispatch looks at the object\'s real runtime type to choose the correct overridden method, not the reference type.'}
+    ]},
+  m4:{ title:'Module 4 Check — Mastery', unlockNext:'final', lockEl:'lock-final', bodyEl:'body-final', navTarget:'final', badgeEl:'nb-m4',
+    questions:[
+      {q:'In the Account example, what makes SavingsAccount and CurrentAccount return different interest rates?', opts:['Method overloading','Field shadowing','Polymorphic override of an abstract method','Static binding'], correct:2, exp:'Each subclass provides its own body for the abstract interestRate() method — this is overriding plus polymorphism.'},
+      {q:'When should you prefer composition over inheritance?', opts:['Always, inheritance should never be used','When the relationship is "has-a" rather than genuinely "is-a"','Only for abstract classes','Never, composition is slower'], correct:1, exp:'Composition ("has-a", e.g. Car has an Engine) avoids fragile deep hierarchies when there isn\'t a true "is-a" relationship.'},
+      {q:'Why does Account implement Transactable as an interface rather than putting withdraw() only in the abstract class?', opts:['Interfaces run faster','So unrelated classes could also share the Transactable capability if needed','It is required by Java syntax','It has no real benefit'], correct:1, exp:'Interfaces let unrelated classes share a capability/contract, keeping the design flexible beyond just the Account hierarchy.'},
+      {q:'What best describes the overall design combining Account, its subclasses, and Transactable?', opts:['Only inheritance is used','Only abstraction is used','All four OOP pillars working together','Neither encapsulation nor polymorphism apply'], correct:2, exp:'The design uses encapsulation (private balance), inheritance (extends Account), abstraction (interface + abstract class), and polymorphism (interestRate/withdraw overrides).'}
+    ]}
+};
+
+function renderQuiz(key, containerId){
+  const data = quizData[key];
+  const container = document.getElementById(containerId);
+  let html = `<div class="quiz-head"><h3>${data.title}</h3><div class="quiz-progress">${data.questions.length} questions · +10 XP each</div></div>`;
+  data.questions.forEach((q,qi)=>{
+    html += `<div class="q-block" data-qi="${qi}">
+      <div class="q-text">${qi+1}. ${q.q}</div>
+      <div class="q-opts">`;
+    q.opts.forEach((opt,oi)=>{
+      html += `<label class="opt" data-oi="${oi}">
+        <input type="radio" name="${key}-q${qi}" value="${oi}">
+        <span>${opt}</span>
+      </label>`;
+    });
+    html += `</div><div class="q-explain">${q.exp}</div></div>`;
+  });
+  html += `<div class="quiz-actions">
+      <button class="btn small" id="${key}-check">Check answers</button>
+      <button class="btn secondary small" id="${key}-next" style="display:none">Continue →</button>
+    </div>
+    <div class="quiz-result" id="${key}-result"></div>`;
+  container.innerHTML = html;
+
+  document.getElementById(key+'-check').addEventListener('click', ()=>gradeQuiz(key));
+  document.getElementById(key+'-next').addEventListener('click', ()=>{
+    unlockModule(key);
+    goTo(quizData[key].navTarget);
+  });
+}
+
+function gradeQuiz(key){
+  const data = quizData[key];
+  let score = 0;
+  let answeredAll = true;
+  data.questions.forEach((q,qi)=>{
+    const selected = document.querySelector(`input[name="${key}-q${qi}"]:checked`);
+    const allOpts = document.querySelectorAll(`input[name="${key}-q${qi}"]`);
+    if(!selected){ answeredAll = false; return; }
+    allOpts.forEach(inp=>{
+      const label = inp.closest('.opt');
+      const oi = parseInt(label.dataset.oi);
+      if(oi === q.correct) label.classList.add('correct');
+      else if(inp.checked && oi !== q.correct) label.classList.add('wrong');
+    });
+    const explainEl = allOpts[0].closest('.q-block').querySelector('.q-explain');
+    explainEl.classList.add('show');
+    if(parseInt(selected.value) === q.correct) score++;
+  });
+  if(!answeredAll){
+    alert('Please answer every question before checking your results.');
+    return;
+  }
+  const pct = Math.round((score/data.questions.length)*100);
+  const xpEarned = score*10;
+  state.xp += xpEarned;
+  state.modules[key] = state.modules[key] || {};
+  state.modules[key].done = true;
+  state.modules[key].score = pct;
+  state.badges += 1;
+  refreshProgressUI();
+
+  let tier = pct===100? '🥇 Gold — mastered!' : pct>=75? '🥈 Silver — great grasp' : pct>=50? '🥉 Bronze — solid start' : 'Keep practicing — review the module above';
+  const resultEl = document.getElementById(key+'-result');
+  resultEl.classList.add('show');
+  resultEl.style.background = pct>=50 ? 'color-mix(in srgb, var(--success) 12%, transparent)' : 'color-mix(in srgb, var(--error) 10%, transparent)';
+  resultEl.innerHTML = `<div class="score">${score}/${data.questions.length}</div><div class="tier">${tier}</div><div style="margin-top:6px;color:var(--text-dim);font-size:13px">+${xpEarned} XP earned</div>`;
+
+  document.getElementById(key+'-check').style.display='none';
+  document.getElementById(key+'-next').style.display='inline-flex';
+
+  const badgeEl = document.getElementById(quizData[key].badgeEl);
+  if(badgeEl){ badgeEl.textContent = pct+'%'; badgeEl.classList.add('done'); }
+
+  // Unlock the next module/section right away — the Continue button is just a convenience scroll-to-it.
+  unlockModule(key);
+}
+
+function unlockModule(key){
+  const data = quizData[key];
+  const lockEl = document.getElementById(data.lockEl);
+  const bodyEl = document.getElementById(data.bodyEl);
+  if(lockEl) lockEl.style.display='none';
+  if(bodyEl) bodyEl.style.display='block';
+  const navEl = document.querySelector(`.nav-item[data-target="${data.navTarget}"]`);
+  if(navEl){ navEl.classList.remove('locked'); navEl.querySelector('.nav-dot').classList.add('done'); navEl.querySelector('.nav-dot').textContent='✓'; }
+}
+
+/* render quizzes into their anchors */
+renderQuiz('m1','quiz-m1-anchor');
+document.getElementById('quiz-m1-anchor').className='quiz';
+renderQuiz('m2','quiz-m2-anchor');
+document.getElementById('quiz-m2-anchor').className='quiz';
+renderQuiz('m3','quiz-m3-anchor');
+document.getElementById('quiz-m3-anchor').className='quiz';
+renderQuiz('m4','quiz-m4-anchor');
+document.getElementById('quiz-m4-anchor').className='quiz';
+
+/* mark m1 nav as unlocked by default (already), keep dot state */
+document.querySelector('.nav-item[data-target="m1"]').classList.remove('locked');
+
+/* ============ FINAL CHALLENGE QUIZ ============ */
+const finalData = {
+  title:'Final Challenge — Media Player System Design',
+  questions:[
+    {q:'You need Playable, Pausable, and Downloadable capabilities shared across unrelated classes (Song, Podcast, Video). What should you use?', opts:['One abstract class implementing all three','Separate interfaces for each capability','A single God class with everything','Static methods only'], correct:1, exp:'Separate interfaces let each class pick only the capabilities it needs — the classic use case for multiple interface implementation.'},
+    {q:'Song and Podcast both share fields like title and duration, plus a play() method with mostly shared logic. What is the best structure?', opts:['No relationship, duplicate the code','An abstract MediaItem class they both extend','Make Podcast extend Song','Use only interfaces, no shared code'], correct:1, exp:'A shared abstract base class is right when subclasses truly share state and partial implementation — an "is-a MediaItem" relationship.'},
+    {q:'A MediaPlayer class holds a reference to a Playlist object it uses but does not "become". What relationship is this?', opts:['Inheritance (is-a)','Composition (has-a)','Polymorphism','Overloading'], correct:1, exp:'MediaPlayer "has-a" Playlist — this is composition, not inheritance, since MediaPlayer is not a kind of Playlist.'},
+    {q:'You loop over `List<MediaItem> queue` and call `item.play()` for each, getting correct behaviour whether it\'s a Song or Podcast. This relies on…', opts:['Static binding','Dynamic dispatch (polymorphism)','Field hiding','Constructor overloading'], correct:1, exp:'Each play() call resolves to the correct overridden method based on the object\'s actual runtime type — dynamic dispatch.'}
+  ]
+};
+(function renderFinal(){
+  const container = document.getElementById('quiz-final');
+  let html = `<div class="quiz-head"><h3>${finalData.title}</h3><div class="quiz-progress">${finalData.questions.length} questions · +15 XP each</div></div>`;
+  finalData.questions.forEach((q,qi)=>{
+    html += `<div class="q-block" data-qi="${qi}"><div class="q-text">${qi+1}. ${q.q}</div><div class="q-opts">`;
+    q.opts.forEach((opt,oi)=>{
+      html += `<label class="opt" data-oi="${oi}"><input type="radio" name="final-q${qi}" value="${oi}"><span>${opt}</span></label>`;
+    });
+    html += `</div><div class="q-explain">${q.exp}</div></div>`;
+  });
+  html += `<div class="quiz-actions"><button class="btn small" id="final-check">Check answers</button></div><div class="quiz-result" id="final-result"></div>`;
+  container.innerHTML = html;
+  document.getElementById('final-check').addEventListener('click', ()=>{
+    let score=0, answeredAll=true;
+    finalData.questions.forEach((q,qi)=>{
+      const selected = document.querySelector(`input[name="final-q${qi}"]:checked`);
+      if(!selected){ answeredAll=false; return; }
+      const allOpts = document.querySelectorAll(`input[name="final-q${qi}"]`);
+      allOpts.forEach(inp=>{
+        const label = inp.closest('.opt');
+        const oi = parseInt(label.dataset.oi);
+        if(oi===q.correct) label.classList.add('correct');
+        else if(inp.checked) label.classList.add('wrong');
+      });
+      allOpts[0].closest('.q-block').querySelector('.q-explain').classList.add('show');
+      if(parseInt(selected.value)===q.correct) score++;
+    });
+    if(!answeredAll){ alert('Please answer every question first.'); return; }
+    const pct = Math.round((score/finalData.questions.length)*100);
+    state.xp += score*15;
+    state.modules.final.done = true;
+    state.modules.final.score = pct;
+    state.badges += 1;
+    refreshProgressUI();
+    const tier = pct===100?"🏅 Perfect — you've mastered Java OOP!":pct>=75?'🥈 Strong design instincts':'🥉 Review the modules and try again';
+    const resultEl = document.getElementById('final-result');
+    resultEl.classList.add('show');
+    resultEl.innerHTML = `<div class="score">${score}/${finalData.questions.length}</div><div class="tier">${tier}</div>`;
+    document.getElementById('nb-final').textContent = pct+'%';
+    document.getElementById('nb-final').classList.add('done');
+  });
+})();
+</script>
+</body>
+</html>
