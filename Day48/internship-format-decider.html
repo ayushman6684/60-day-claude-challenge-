@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Remote vs. Hybrid vs. On-site — Internship Decision Dossier</title>
+<style>
+  :root{
+    --ink:#1C2B39;
+    --paper:#F2EFE6;
+    --paper-raised:#FBFAF5;
+    --forest:#2F5233;
+    --forest-dark:#203A24;
+    --clay:#B5563C;
+    --gold:#C89B3C;
+    --charcoal:#24262B;
+    --muted:#6B6B63;
+    --line:#D8D3C4;
+    --line-strong:#B7B09A;
+    --shadow: rgba(28,43,57,0.06);
+    --font-display: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Times New Roman', serif;
+    --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: ui-monospace, 'SF Mono', 'Cascadia Mono', Consolas, 'Courier New', monospace;
+  }
+
+  html[data-theme="dark"]{
+    --ink:#EDEAE0;
+    --paper:#161D22;
+    --paper-raised:#1D262C;
+    --forest:#5A9468;
+    --forest-dark:#7CB98A;
+    --clay:#E08A6C;
+    --gold:#D8B662;
+    --charcoal:#E7E4D9;
+    --muted:#8D9098;
+    --line:#31393E;
+    --line-strong:#454E54;
+    --shadow: rgba(0,0,0,0.35);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--charcoal);
+    font-family:var(--font-body);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    transition:background .25s ease, color .25s ease;
+  }
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(0,0,0,0.015) 0px, rgba(0,0,0,0.015) 1px, transparent 1px, transparent 3px);
+    pointer-events:none;
+    z-index:0;
+  }
+  html[data-theme="dark"] body::before{
+    background-image:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 3px);
+  }
+
+  a{color:var(--forest-dark);}
+
+  .wrap{max-width:1180px; margin:0 auto; padding:0 24px 48px; position:relative; z-index:1;}
+
+  /* ---------- Masthead ---------- */
+  header.masthead{
+    border-bottom:3px double var(--ink);
+    padding:24px 0 14px;
+    margin-bottom:0;
+  }
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--clay);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:8px;
+  }
+  .theme-toggle{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-family:var(--font-mono);
+    font-size:10.5px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--muted);
+    background:none;
+    border:1px solid var(--line-strong);
+    padding:4px 10px 4px 4px;
+    cursor:pointer;
+    border-radius:999px;
+  }
+  .theme-toggle:hover{border-color:var(--forest-dark); color:var(--forest-dark);}
+  .toggle-track{
+    width:30px; height:16px;
+    background:var(--line);
+    border:1px solid var(--line-strong);
+    border-radius:999px;
+    position:relative;
+    flex-shrink:0;
+    transition:background .2s ease;
+  }
+  .toggle-knob{
+    position:absolute;
+    top:1px; left:1px;
+    width:12px; height:12px;
+    background:var(--forest-dark);
+    border-radius:50%;
+    transition:transform .2s ease;
+  }
+  html[data-theme="dark"] .toggle-knob{transform:translateX(14px);}
+  h1.title{
+    font-family:var(--font-display);
+    font-size:clamp(28px, 4vw, 46px);
+    font-weight:700;
+    margin:0 0 8px;
+    color:var(--ink);
+    letter-spacing:-0.01em;
+  }
+  .subdek{
+    font-size:15.5px;
+    color:var(--muted);
+    max-width:640px;
+    margin:0;
+  }
+  .masthead-meta{
+    display:flex;
+    gap:20px;
+    flex-wrap:wrap;
+    margin-top:12px;
+    font-family:var(--font-mono);
+    font-size:11.5px;
+    color:var(--muted);
+  }
+  .masthead-meta span b{color:var(--charcoal);}
+
+  /* ---------- Section headers ---------- */
+  .section-label{
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--forest-dark);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:30px 0 14px;
+  }
+  .section-label::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:var(--line-strong);
+  }
+
+  /* ---------- Layout: dial + leaderboard ---------- */
+  .studio{
+    display:grid;
+    grid-template-columns:280px 1fr;
+    gap:20px;
+    align-items:start;
+  }
+  @media (max-width:860px){
+    .studio{grid-template-columns:1fr;}
+  }
+
+  .dial-panel{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    padding:18px 18px 20px;
+    position:sticky;
+    top:14px;
+    box-shadow:0 1px 2px var(--shadow);
+  }
+  @media (max-width:860px){ .dial-panel{position:static;} }
+
+  .dial-title{
+    font-family:var(--font-display);
+    font-size:17px;
+    margin:0 0 4px;
+    color:var(--ink);
+  }
+  .dial-sub{
+    font-size:12px;
+    color:var(--muted);
+    margin:0 0 14px;
+  }
+
+  .weight-row{margin-bottom:14px;}
+  .weight-row:last-child{margin-bottom:4px;}
+  .weight-row label{
+    display:flex;
+    justify-content:space-between;
+    font-size:13px;
+    font-weight:600;
+    color:var(--charcoal);
+    margin-bottom:6px;
+  }
+  .weight-row label .val{
+    font-family:var(--font-mono);
+    font-weight:700;
+    color:var(--forest-dark);
+    background:#E8E4D6;
+    padding:1px 7px;
+    border:1px solid var(--line-strong);
+    min-width:34px;
+    text-align:center;
+  }
+  input[type="range"]{
+    -webkit-appearance:none;
+    appearance:none;
+    width:100%;
+    height:6px;
+    background:var(--line);
+    outline:none;
+    border:1px solid var(--line-strong);
+  }
+  input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    width:16px; height:16px;
+    background:var(--forest);
+    border:2px solid var(--paper-raised);
+    box-shadow:0 0 0 1px var(--forest-dark);
+    cursor:pointer;
+    margin-top:-1px;
+  }
+  input[type="range"]::-moz-range-thumb{
+    width:14px; height:14px;
+    background:var(--forest);
+    border:2px solid var(--paper-raised);
+    box-shadow:0 0 0 1px var(--forest-dark);
+    cursor:pointer;
+  }
+  .weight-hint{font-size:11px; color:var(--muted); margin-top:4px;}
+
+  .reset-btn{
+    width:100%;
+    margin-top:6px;
+    padding:9px 10px;
+    background:var(--ink);
+    color:var(--paper-raised);
+    border:none;
+    font-family:var(--font-mono);
+    font-size:11.5px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    cursor:pointer;
+  }
+  .reset-btn:hover{background:var(--forest-dark);}
+
+  .preset-row{display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap;}
+  .preset-btn{
+    flex:1;
+    min-width:80px;
+    font-family:var(--font-mono);
+    font-size:10.5px;
+    letter-spacing:.02em;
+    padding:6px 4px;
+    background:var(--paper);
+    border:1px solid var(--line-strong);
+    color:var(--charcoal);
+    cursor:pointer;
+  }
+  .preset-btn:hover{border-color:var(--forest-dark); color:var(--forest-dark);}
+
+  /* ---------- Leaderboard ---------- */
+  .leaderboard{display:flex; flex-direction:column; gap:12px;}
+  .rank-card{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    padding:16px 18px;
+    position:relative;
+    box-shadow:0 1px 2px var(--shadow);
+    transition:box-shadow .2s ease, transform .2s ease;
+  }
+  .rank-card.top{border-color:var(--forest-dark); box-shadow:0 2px 0 var(--forest-dark);}
+  .rank-head{
+    display:flex;
+    align-items:baseline;
+    gap:12px;
+    margin-bottom:8px;
+    flex-wrap:wrap;
+  }
+  .rank-num{
+    font-family:var(--font-mono);
+    font-size:12px;
+    color:var(--muted);
+    width:20px;
+  }
+  .rank-name{
+    font-family:var(--font-display);
+    font-size:21px;
+    color:var(--ink);
+    margin-right:auto;
+  }
+  .rank-badge{
+    font-family:var(--font-mono);
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    padding:2px 8px;
+    border:1px solid var(--forest-dark);
+    color:var(--forest-dark);
+  }
+  .rank-score{
+    font-family:var(--font-mono);
+    font-size:22px;
+    font-weight:700;
+    color:var(--charcoal);
+  }
+  .rank-score sub{font-size:12px; color:var(--muted); font-weight:400;}
+
+  .bar-track{
+    height:9px;
+    background:var(--line);
+    border:1px solid var(--line-strong);
+    margin-bottom:12px;
+    overflow:hidden;
+  }
+  .bar-fill{
+    height:100%;
+    background:linear-gradient(90deg, var(--forest-dark), var(--forest));
+    transition:width .35s ease;
+  }
+
+  .breakdown{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+  }
+  @media (max-width:640px){ .breakdown{grid-template-columns:repeat(2,1fr);} }
+  .crit-box{
+    background:var(--paper);
+    border:1px solid var(--line);
+    padding:8px 9px;
+  }
+  .crit-box .k{
+    font-family:var(--font-mono);
+    font-size:9.5px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    color:var(--muted);
+    display:block;
+    margin-bottom:3px;
+  }
+  .crit-box .v{
+    font-family:var(--font-mono);
+    font-size:14px;
+    font-weight:700;
+    color:var(--ink);
+  }
+  .crit-box .v .flag{
+    color:var(--clay);
+    font-size:10px;
+    font-weight:700;
+    margin-left:4px;
+    vertical-align:top;
+  }
+
+  /* ---------- Data table ---------- */
+  .table-scroll{overflow-x:auto; border:1px solid var(--line); background:var(--paper-raised); box-shadow:0 1px 2px var(--shadow);}
+  table.data-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13.5px;
+    table-layout:fixed;
+    min-width:760px;
+  }
+  table.data-table th, table.data-table td{
+    padding:12px 14px;
+    text-align:left;
+    border-bottom:1px solid var(--line);
+    border-left:1px solid var(--line);
+    vertical-align:top;
+  }
+  table.data-table th:first-child, table.data-table td:first-child{border-left:none;}
+  table.data-table th{
+    font-family:var(--font-mono);
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    color:var(--muted);
+    background:var(--paper);
+    position:sticky; top:0;
+  }
+  table.data-table td.crit-label{width:19%; background:var(--paper); font-size:13px;}
+  table.data-table td.figure-cell{width:27%;}
+  .figure-line{
+    font-family:var(--font-mono);
+    font-weight:700;
+    font-size:14px;
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-bottom:6px;
+  }
+  .figure-line .unit{
+    font-weight:400;
+    color:var(--muted);
+    font-size:11px;
+    font-family:var(--font-body);
+  }
+  .note-text{
+    color:var(--muted);
+    font-size:12px;
+    line-height:1.45;
+  }
+  .note-text .cite{color:var(--forest-dark); font-family:var(--font-mono); font-size:11px;}
+  .tag-est{
+    display:inline-block;
+    font-family:var(--font-mono);
+    font-size:9.5px;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    color:var(--clay);
+    border:1px solid var(--clay);
+    padding:1px 5px;
+  }
+  .tag-sourced{
+    display:inline-block;
+    font-family:var(--font-mono);
+    font-size:9.5px;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    color:var(--forest-dark);
+    border:1px solid var(--forest-dark);
+    padding:1px 5px;
+  }
+
+  /* ---------- Collapsibles ---------- */
+  details.panel{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    margin-bottom:12px;
+    box-shadow:0 1px 2px var(--shadow);
+  }
+  details.panel > summary{
+    list-style:none;
+    cursor:pointer;
+    padding:14px 18px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-family:var(--font-display);
+    font-size:16px;
+    color:var(--ink);
+  }
+  details.panel > summary::-webkit-details-marker{display:none;}
+  details.panel > summary::before{
+    content:"+";
+    font-family:var(--font-mono);
+    font-size:15px;
+    color:var(--forest-dark);
+    border:1px solid var(--forest-dark);
+    width:19px; height:19px;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  details.panel[open] > summary::before{content:"–";}
+  .panel-body{
+    padding:0 20px 18px 51px;
+    font-size:14px;
+    color:var(--charcoal);
+  }
+  .panel-body p{margin:0 0 10px;}
+  .panel-body h4{
+    font-family:var(--font-mono);
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:var(--forest-dark);
+    margin:14px 0 6px;
+  }
+  .panel-body ul{margin:6px 0 10px; padding-left:18px;}
+  .panel-body li{margin-bottom:6px;}
+
+  /* ---------- Sources ---------- */
+  .source-list{list-style:none; margin:0; padding:0;}
+  .source-list li{
+    padding:12px 0;
+    border-bottom:1px solid var(--line);
+    display:flex;
+    gap:12px;
+    font-size:13.5px;
+  }
+  .source-list li:last-child{border-bottom:none;}
+  .source-idx{
+    font-family:var(--font-mono);
+    color:var(--muted);
+    flex-shrink:0;
+    width:20px;
+  }
+  .source-body b{color:var(--ink);}
+  .source-body a{font-size:12px; word-break:break-all;}
+  .used-for{
+    font-family:var(--font-mono);
+    font-size:10.5px;
+    color:var(--forest-dark);
+    text-transform:uppercase;
+    letter-spacing:.03em;
+  }
+
+  footer.foot{
+    margin-top:32px;
+    padding-top:16px;
+    border-top:1px solid var(--line-strong);
+    font-size:12px;
+    color:var(--muted);
+    text-align:center;
+  }
+
+  .loading-state, .empty-state{
+    padding:40px 20px;
+    text-align:center;
+    color:var(--muted);
+    font-family:var(--font-mono);
+    font-size:13px;
+  }
+  .spinner{
+    width:22px;height:22px;
+    border:2px solid var(--line-strong);
+    border-top-color:var(--forest-dark);
+    border-radius:50%;
+    margin:0 auto 12px;
+    animation:spin .8s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .hidden{display:none !important;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="eyebrow">
+      <span>Compare &amp; Decide Dossier · Vol. 03</span>
+      <span style="display:flex; align-items:center; gap:14px;">
+        <span id="today-date"></span>
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false">
+          <span class="toggle-track"><span class="toggle-knob"></span></span>
+          <span id="theme-toggle-label">Light</span>
+        </button>
+      </span>
+    </div>
+    <h1 class="title">Remote, Hybrid, or On-site?</h1>
+    <p class="subdek">A weighted, source-checked comparison of internship formats — built for college students choosing between offers. Adjust the priority dial to see the ranking update live.</p>
+    <div class="masthead-meta">
+      <span>Audience: <b>Undergraduates weighing internship offers</b></span>
+      <span>Options compared: <b>Fully Remote · Hybrid · Fully On-site</b></span>
+      <span>Criteria: <b>4, user-weighted</b></span>
+    </div>
+  </header>
+
+  <div id="loading" class="loading-state">
+    <div class="spinner"></div>
+    Assembling sourced figures and building the dial…
+  </div>
+
+  <div id="app" class="hidden">
+
+    <div class="section-label">Set your priorities</div>
+    <div class="studio">
+      <div class="dial-panel">
+        <h3 class="dial-title">The Priority Dial</h3>
+        <p class="dial-sub">Drag each lever to reflect how much it matters to <em>you</em>. The ranking below recalculates instantly — nothing is submitted or saved.</p>
+
+        <div class="preset-row">
+          <button class="preset-btn" data-preset="balanced">Balanced</button>
+          <button class="preset-btn" data-preset="broke">Tight Budget</button>
+          <button class="preset-btn" data-preset="career">Career-First</button>
+        </div>
+
+        <div class="weight-row">
+          <label>Cost of Living / Commuting <span class="val" id="val-cost">25</span></label>
+          <input type="range" min="0" max="100" value="25" id="w-cost">
+          <div class="weight-hint">Lower financial burden scores higher.</div>
+        </div>
+        <div class="weight-row">
+          <label>Networking &amp; Mentorship <span class="val" id="val-network">25</span></label>
+          <input type="range" min="0" max="100" value="25" id="w-network">
+          <div class="weight-hint">Access to people, not just projects.</div>
+        </div>
+        <div class="weight-row">
+          <label>Skill &amp; Learning Outcomes <span class="val" id="val-skill">25</span></label>
+          <input type="range" min="0" max="100" value="25" id="w-skill">
+          <div class="weight-hint">Depth of what you'll actually learn.</div>
+        </div>
+        <div class="weight-row">
+          <label>Job Conversion Rate <span class="val" id="val-convert">25</span></label>
+          <input type="range" min="0" max="100" value="25" id="w-convert">
+          <div class="weight-hint">Odds the internship becomes a job offer.</div>
+        </div>
+
+        <button class="reset-btn" id="reset-weights">Reset to Balanced</button>
+      </div>
+
+      <div>
+        <div class="leaderboard" id="leaderboard"><!-- injected --></div>
+      </div>
+    </div>
+
+    <div class="section-label">The underlying data</div>
+    <div class="table-scroll">
+      <table class="data-table" id="data-table"><!-- injected --></table>
+    </div>
+
+    <div class="section-label">Notes &amp; methodology</div>
+
+    <details class="panel" id="panel-research">
+      <summary>How this was researched</summary>
+      <div class="panel-body" id="research-body"><!-- injected --></div>
+    </details>
+
+    <details class="panel" id="panel-sources">
+      <summary>Sources cited (9)</summary>
+      <div class="panel-body">
+        <ul class="source-list" id="source-list"><!-- injected --></ul>
+      </div>
+    </details>
+
+    <div id="empty-state" class="empty-state hidden">
+      No comparison possible — every priority is set to zero. Move at least one lever to see a ranking.
+    </div>
+
+  </div>
+
+  <footer class="foot">
+    Built as a decision-support dossier, not financial or career advice. Figures marked <span class="tag-est">Estimate</span> are directional, not measured — verify against your specific offer before deciding. Last compiled: <span id="footer-date"></span>.
+  </footer>
+
+</div>
+
+<script>
+(function(){
+
+  // ---------------------------------------------------------------
+  // DATA — every figure traceable to a source in SOURCES below.
+  // "sourced" = true  -> a real, citable, reported statistic
+  // "sourced" = false -> a modeled/directional estimate (flagged in UI)
+  // ---------------------------------------------------------------
+
+  const SOURCES = [
+    {
+      id: 1,
+      title: "Intern Offer and Conversion Rates Fall, Acceptances Rise",
+      pub: "NACE — 2025 Internship & Co-op Report (2023–24 intern cohort)",
+      url: "https://www.naceweb.org/talent-acquisition/internships/intern-offer-and-conversion-rates-fall-acceptances-rise",
+      usedFor: "Offer rate & conversion rate — On-site and Hybrid"
+    },
+    {
+      id: 2,
+      title: "Relocation Assistance for Interns: Why It Matters and How Employers Set Amounts",
+      pub: "NACE — 2026 Internship & Co-op Report",
+      url: "https://www.naceweb.org/talent-acquisition/internships/relocation-assistance-for-interns-why-it-matters-and-how-employers-set-amounts",
+      usedFor: "Typical relocation lump sums (housing & travel) for on-site interns"
+    },
+    {
+      id: 3,
+      title: "15 Best Practices for Internship Programs",
+      pub: "NACE",
+      url: "https://www.naceweb.org/talent-acquisition/internships/15-best-practices-for-internship-programs/",
+      usedFor: "Student format preference data; qualitative basis for Networking scores"
+    },
+    {
+      id: 4,
+      title: "Key Factors Leading to Intern Conversion",
+      pub: "NACE — 2024 NACE Student Survey",
+      url: "https://www.naceweb.org/talent-acquisition/internships/key-factors-leading-to-intern-conversion",
+      usedFor: "Baseline student satisfaction & skill-gain rates across internships"
+    },
+    {
+      id: 5,
+      title: "The True Cost of Internship—And How to Save Money?",
+      pub: "2nd Address Research",
+      url: "https://www.2ndaddress.com/research/cost-of-internship/",
+      usedFor: "Monthly cost-of-living figure for on-site interns in major hub cities"
+    },
+    {
+      id: 6,
+      title: "Research paints disappointing picture of online internships",
+      pub: "Inside Higher Ed",
+      url: "https://www.insidehighered.com/news/2021/05/19/research-paints-disappointing-picture-online-internships",
+      usedFor: "Qualitative basis for lower Networking score, Remote"
+    },
+    {
+      id: 7,
+      title: "Virtual internships as alternative work-based learning: Examining access, quality, and outcomes for underserved students",
+      pub: "ScienceDirect (Computers & Education journal family)",
+      url: "https://www.sciencedirect.com/science/article/pii/S0360131525002076",
+      usedFor: "Evidence that well-run virtual internships can approach in-person skill outcomes"
+    },
+    {
+      id: 8,
+      title: "Virtual Internships vs. In-Person: Which Is Worth It?",
+      pub: "Extern",
+      url: "https://www.extern.com/post/virtual-internships-vs-in-person-guide",
+      usedFor: "General framing: flexibility vs. networking/conversion trade-off"
+    },
+    {
+      id: 9,
+      title: "Assessing student satisfaction with virtual internship programs in tertiary institutions",
+      pub: "Discover Education (Springer Nature), quantitative survey, n=300",
+      url: "https://link.springer.com/article/10.1007/s44217-026-01338-8",
+      usedFor: "Qualitative basis for Skill & Learning Outcomes scores, Remote/Hybrid"
+    }
+  ];
+
+  // raw figures per option per criterion
+  const OPTIONS = [
+    {
+      key: "remote",
+      name: "Fully Remote",
+      cost: { value: 100, unit: "$/mo est. burden", sourced: false, note: "No study isolates a remote-specific monthly cost; modeled as home-internet/equipment overhead only, since housing & commuting costs are avoided. Directional, not measured." , cite:[5]},
+      network: { value: 5, unit: "/10 qualitative", sourced: false, note: "Synthesized from cited research on reduced informal interaction in remote settings; some structured programs raise this meaningfully.", cite:[6,3] },
+      skill: { value: 7, unit: "/10 qualitative", sourced: false, note: "Peer-reviewed evidence shows well-run virtual internships can approach in-person skill parity, though execution varies widely.", cite:[7,9] },
+      convert: { value: 40, unit: "% est. offer/convert avg", sourced: false, note: "NACE does not report a fully-remote-only category (only In-person vs Hybrid). Estimated directionally below Hybrid's reported 51.1% avg, consistent with cited research trend.", cite:[1,3] }
+    },
+    {
+      key: "hybrid",
+      name: "Hybrid",
+      cost: { value: 1400, unit: "$/mo est. burden", sourced: false, note: "No source breaks out hybrid-specific cost. Modeled as partial local commuting + partial housing need, roughly midway between Remote and On-site figures.", cite:[5] },
+      network: { value: 7, unit: "/10 qualitative", sourced: false, note: "NACE reporting notes hybrid interns are generally more satisfied, though in-person peers have more chances to be visible to decision-makers.", cite:[3,1] },
+      skill: { value: 8, unit: "/10 qualitative", sourced: false, note: "Comparable to on-site in cited survey data; blended structure supports both independent and mentored learning.", cite:[9,4] },
+      convert: { value: 51.1, unit: "% avg of offer 56.2% / convert 46%", sourced: true, note: "NACE 2025 report: 56.2% offer rate, 46% conversion rate for hybrid interns, 2023–24 cohort.", cite:[1] }
+    },
+    {
+      key: "onsite",
+      name: "Fully On-site",
+      cost: { value: 2610, unit: "$/mo cost of living", sourced: true, note: "Average monthly cost of living (rent, food, transport, discretionary) across major U.S. intern-hub cities.", cite:[5] },
+      network: { value: 9, unit: "/10 qualitative", sourced: false, note: "NACE guidance states in-person arrangements are generally the most effective for building connections; corroborated by Inside Higher Ed reporting on lost informal access in remote settings.", cite:[3,6] },
+      skill: { value: 8, unit: "/10 qualitative", sourced: false, note: "High rates of reported skill-gain and satisfaction among interns generally (NACE Student Survey), face-to-face mentorship supports faster feedback loops.", cite:[4] },
+      convert: { value: 65.2, unit: "% avg of offer 71.9% / convert 58.5%", sourced: true, note: "NACE 2025 report: 71.9% offer rate, 58.5% conversion rate for in-person interns, 2023–24 cohort.", cite:[1] }
+    }
+  ];
+
+  const MAX_COST = 2610;   // On-site figure anchors the cost scale
+  const MAX_CONVERT = 71.9; // On-site figure anchors the conversion scale
+
+  function normalizedScores(opt){
+    const costScore = Math.max(0, 10 - (opt.cost.value / MAX_COST) * 10);
+    const networkScore = opt.network.value;
+    const skillScore = opt.skill.value;
+    const convertScore = (opt.convert.value / MAX_CONVERT) * 10;
+    return { costScore, networkScore, skillScore, convertScore };
+  }
+
+  // ---------------------------------------------------------------
+  // RENDER: sources panel
+  // ---------------------------------------------------------------
+  function renderSources(){
+    const list = document.getElementById("source-list");
+    list.innerHTML = SOURCES.map(s => `
+      <li>
+        <span class="source-idx">[${s.id}]</span>
+        <div class="source-body">
+          <div><b>${s.title}</b></div>
+          <div>${s.pub}</div>
+          <div><a href="${s.url}" target="_blank" rel="noopener">${s.url}</a></div>
+          <div class="used-for">Used for: ${s.usedFor}</div>
+        </div>
+      </li>
+    `).join("");
+  }
+
+  // ---------------------------------------------------------------
+  // RENDER: methodology panel
+  // ---------------------------------------------------------------
+  function renderResearch(){
+    document.getElementById("research-body").innerHTML = `
+      <p>This dossier blends two kinds of data, and the UI is explicit about which is which everywhere a number appears: figures tagged <span class="tag-sourced">Sourced</span> are reported statistics from a named study or survey; figures tagged <span class="tag-est">Estimate</span> are directional, reasoned estimates used only because no citable source isolates that exact number for that exact format.</p>
+
+      <h4>Job Conversion Rate</h4>
+      <p>NACE's 2025 Internship &amp; Co-op Report is the only source found that splits offer and conversion rates by internship modality — but it splits by <em>In-person vs. Hybrid</em> only. NACE's own hybrid definition mixes remote and in-person work, so it does not isolate a "fully remote" figure. Rather than inventing a precise number, Fully Remote's conversion figure is marked as an estimate, set directionally below Hybrid's reported average, consistent with the trend described across NACE commentary and the Extern comparison guide.</p>
+
+      <h4>A resolved conflict: NACE 2024 vs. 2025 vs. 2026 reports</h4>
+      <p>Earlier NACE year-over-year releases (2024 report) show different topline conversion numbers (around 53% overall) than the 2025 report's modality breakdown (71.9% on-site / 56.2% hybrid offer rates) and the 2026 report (a 63.1% overall high). These are not contradictions — they reflect different cohorts (2022–23 vs. 2023–24 vs. 2024–25 intern classes) and different levels of aggregation. This dossier uses the 2025 report because it is the only one of the three that breaks results out by format, which is what this comparison needs.</p>
+
+      <h4>Cost of Living / Commuting</h4>
+      <p>The On-site figure ($2,610/month) is a real reported average across major internship-hub cities. No source was found that reports an equivalent monthly figure specifically for hybrid or remote interns, so those two figures are modeled: Remote is treated as near-zero relocation/commuting cost (only incidental home-office overhead), and Hybrid is placed roughly midway, reflecting partial commuting without full relocation. Both are flagged as estimates in the data table.</p>
+
+      <h4>Networking &amp; Mentorship, and Skill &amp; Learning Outcomes</h4>
+      <p>Neither criterion has a single clean industry-wide numeric benchmark broken out by format. Scores here are a qualitative synthesis of multiple cited sources describing how each format tends to perform — not a survey result on a 1–10 scale. They are intentionally treated as directional in the tool, and weighting them heavily should be read as "how much do I trust the qualitative research consensus," not "how much do I trust a hard number."</p>
+
+      <h4>What would change this dossier</h4>
+      <p>A future NACE report that separately tracks fully-remote internships (rather than folding them into "hybrid") would let the Job Conversion and Cost figures for Remote move from estimates to sourced facts. Until then, treat the Remote column as the least numerically certain of the three.</p>
+    `;
+  }
+
+  // ---------------------------------------------------------------
+  // RENDER: data table
+  // ---------------------------------------------------------------
+  function renderTable(){
+    const rows = [
+      { label: "Cost of Living / Commuting", key: "cost" },
+      { label: "Networking & Mentorship Access", key: "network" },
+      { label: "Skill & Learning Outcomes", key: "skill" },
+      { label: "Job Conversion Rate", key: "convert" }
+    ];
+    let html = `<thead><tr><th>Criterion</th>${OPTIONS.map(o=>`<th>${o.name}</th>`).join("")}</tr></thead><tbody>`;
+    rows.forEach(r => {
+      html += `<tr><td class="crit-label"><b>${r.label}</b></td>`;
+      OPTIONS.forEach(o => {
+        const d = o[r.key];
+        const tag = d.sourced ? `<span class="tag-sourced">Sourced</span>` : `<span class="tag-est">Estimate</span>`;
+        html += `<td class="figure-cell">
+          <div class="figure-line">${d.value}${d.unit ? ' <span class="unit">'+d.unit+'</span>' : ''}${tag}</div>
+          <div class="note-text">${d.note} <span class="cite">${d.cite.map(c=>'['+c+']').join('')}</span></div>
+        </td>`;
+      });
+      html += `</tr>`;
+    });
+    html += `</tbody>`;
+    document.getElementById("data-table").innerHTML = html;
+  }
+
+  // ---------------------------------------------------------------
+  // RANK + LEADERBOARD
+  // ---------------------------------------------------------------
+  function getWeights(){
+    const c = +document.getElementById("w-cost").value;
+    const n = +document.getElementById("w-network").value;
+    const s = +document.getElementById("w-skill").value;
+    const j = +document.getElementById("w-convert").value;
+    const total = c+n+s+j;
+    return { c, n, s, j, total };
+  }
+
+  function computeRanking(){
+    const w = getWeights();
+    const emptyState = document.getElementById("empty-state");
+    const leaderboard = document.getElementById("leaderboard");
+
+    if (w.total === 0){
+      leaderboard.innerHTML = "";
+      emptyState.classList.remove("hidden");
+      return;
+    }
+    emptyState.classList.add("hidden");
+
+    const results = OPTIONS.map(opt => {
+      const s = normalizedScores(opt);
+      const weighted =
+        (s.costScore * w.c) +
+        (s.networkScore * w.n) +
+        (s.skillScore * w.s) +
+        (s.convertScore * w.j);
+      const finalScore = weighted / w.total; // 0-10 scale
+      return { opt, s, finalScore };
+    }).sort((a,b) => b.finalScore - a.finalScore);
+
+    const maxScore = results[0].finalScore || 1;
+
+    leaderboard.innerHTML = results.map((r, i) => {
+      const pct = Math.max(4, (r.finalScore / 10) * 100);
+      return `
+        <div class="rank-card ${i===0 ? 'top' : ''}">
+          <div class="rank-head">
+            <span class="rank-num">${String(i+1).padStart(2,'0')}</span>
+            <span class="rank-name">${r.opt.name}</span>
+            ${i===0 ? '<span class="rank-badge">Best fit for your weights</span>' : ''}
+            <span class="rank-score">${r.finalScore.toFixed(1)}<sub>/10</sub></span>
+          </div>
+          <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+          <div class="breakdown">
+            <div class="crit-box"><span class="k">Cost</span><span class="v">${r.s.costScore.toFixed(1)}${r.opt.cost.sourced?'':'<span class="flag">est</span>'}</span></div>
+            <div class="crit-box"><span class="k">Network</span><span class="v">${r.s.networkScore.toFixed(1)}<span class="flag">qual</span></span></div>
+            <div class="crit-box"><span class="k">Skill</span><span class="v">${r.s.skillScore.toFixed(1)}<span class="flag">qual</span></span></div>
+            <div class="crit-box"><span class="k">Conversion</span><span class="v">${r.s.convertScore.toFixed(1)}${r.opt.convert.sourced?'':'<span class="flag">est</span>'}</span></div>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  // ---------------------------------------------------------------
+  // WIRE UP CONTROLS
+  // ---------------------------------------------------------------
+  const sliderIds = [
+    ["w-cost","val-cost"],
+    ["w-network","val-network"],
+    ["w-skill","val-skill"],
+    ["w-convert","val-convert"]
+  ];
+
+  function wireSliders(){
+    sliderIds.forEach(([sliderId, labelId]) => {
+      const el = document.getElementById(sliderId);
+      el.addEventListener("input", () => {
+        document.getElementById(labelId).textContent = el.value;
+        computeRanking();
+      });
+    });
+
+    document.getElementById("reset-weights").addEventListener("click", () => {
+      applyWeights(25,25,25,25);
+    });
+
+    document.querySelectorAll(".preset-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const p = btn.dataset.preset;
+        if (p === "balanced") applyWeights(25,25,25,25);
+        if (p === "broke") applyWeights(55,15,10,20);
+        if (p === "career") applyWeights(10,30,25,35);
+      });
+    });
+  }
+
+  function applyWeights(c,n,s,j){
+    document.getElementById("w-cost").value = c;
+    document.getElementById("w-network").value = n;
+    document.getElementById("w-skill").value = s;
+    document.getElementById("w-convert").value = j;
+    document.getElementById("val-cost").textContent = c;
+    document.getElementById("val-network").textContent = n;
+    document.getElementById("val-skill").textContent = s;
+    document.getElementById("val-convert").textContent = j;
+    computeRanking();
+  }
+
+  // ---------------------------------------------------------------
+  // INIT (with a small simulated load so the loading state is real
+  // work being shown, not just decorative)
+  // ---------------------------------------------------------------
+  function wireThemeToggle(){
+    const btn = document.getElementById("theme-toggle");
+    const label = document.getElementById("theme-toggle-label");
+    btn.addEventListener("click", () => {
+      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+      if (isDark){
+        document.documentElement.removeAttribute("data-theme");
+        label.textContent = "Light";
+        btn.setAttribute("aria-pressed", "false");
+      } else {
+        document.documentElement.setAttribute("data-theme", "dark");
+        label.textContent = "Dark";
+        btn.setAttribute("aria-pressed", "true");
+      }
+    });
+  }
+
+  function setDates(){
+    const opts = { year:'numeric', month:'long', day:'numeric' };
+    const d = new Date();
+    const str = d.toLocaleDateString('en-US', opts);
+    document.getElementById("today-date").textContent = str;
+    document.getElementById("footer-date").textContent = str;
+  }
+
+  function init(){
+    try{
+      setDates();
+      wireThemeToggle();
+      renderSources();
+      renderResearch();
+      renderTable();
+      wireSliders();
+      computeRanking();
+      document.getElementById("loading").classList.add("hidden");
+      document.getElementById("app").classList.remove("hidden");
+    }catch(err){
+      document.getElementById("loading").innerHTML =
+        '<div style="color:#B5563C;">Something went wrong building the dossier. Try reloading this file. (' + (err && err.message ? err.message : 'unknown error') + ')</div>';
+    }
+  }
+
+  window.addEventListener("DOMContentLoaded", () => {
+    setTimeout(init, 260);
+  });
+
+})();
+</script>
+</body>
+</html>
