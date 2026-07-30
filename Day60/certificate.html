@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Certificate of Completion — Ayushman Yadav</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0c1533;
+    --navy-deep: #070d21;
+    --parchment: #faf5e9;
+    --parchment-edge: #f1e9d6;
+    --gold: #b6892f;
+    --gold-bright: #d6ad5c;
+    --ink: #1c2333;
+    --slate: #5b6478;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #1a1f30;
+    font-family: 'Jost', sans-serif;
+  }
+  .stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px;
+  }
+  .certificate {
+    position: relative;
+    width: 1100px;
+    max-width: 100%;
+    aspect-ratio: 1100 / 778;
+    background:
+      radial-gradient(1200px 500px at 50% -10%, rgba(182,137,47,0.10), transparent 60%),
+      var(--parchment);
+    border: 2px solid var(--gold);
+    outline: 8px solid var(--navy);
+    outline-offset: -22px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.45);
+    padding: 46px 58px;
+    display: flex;
+    flex-direction: column;
+    color: var(--ink);
+  }
+  .corner {
+    position: absolute;
+    width: 46px;
+    height: 46px;
+    border: 2px solid var(--gold);
+  }
+  .corner.tl { top: 10px; left: 10px; border-right: none; border-bottom: none; }
+  .corner.tr { top: 10px; right: 10px; border-left: none; border-bottom: none; }
+  .corner.bl { bottom: 10px; left: 10px; border-right: none; border-top: none; }
+  .corner.br { bottom: 10px; right: 10px; border-left: none; border-top: none; }
+
+  .header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo-wrap img {
+    height: 46px;
+    display: block;
+    filter: none;
+    background: var(--navy);
+    padding: 8px 14px;
+    border-radius: 4px;
+  }
+  .program-tag {
+    text-align: right;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--slate);
+  }
+  .program-tag strong { color: var(--navy); display:block; font-size: 12px; letter-spacing: 0.1em; }
+
+  .eyebrow {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 12px;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 500;
+  }
+  .title {
+    text-align: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-size: 54px;
+    margin: 8px 0 2px;
+    color: var(--navy);
+    letter-spacing: 0.01em;
+  }
+  .subtitle {
+    text-align: center;
+    font-size: 14px;
+    color: var(--slate);
+    margin-bottom: 6px;
+  }
+
+  .divider {
+    width: 120px;
+    height: 2px;
+    background: var(--gold);
+    margin: 18px auto 22px;
+    position: relative;
+  }
+  .divider::before {
+    content: "◆";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--parchment);
+    color: var(--gold);
+    padding: 0 10px;
+    font-size: 12px;
+  }
+
+  .presented-to {
+    text-align: center;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--slate);
+  }
+  .recipient {
+    text-align: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 600;
+    font-size: 44px;
+    color: var(--navy);
+    margin: 6px 0 18px;
+    border-bottom: 1.5px solid var(--gold);
+    display: inline-block;
+    padding: 0 10px 6px;
+    align-self: center;
+  }
+  .recipient-wrap { text-align: center; }
+
+  .body-text {
+    text-align: center;
+    max-width: 720px;
+    margin: 0 auto;
+    font-size: 15.5px;
+    line-height: 1.75;
+    color: var(--ink);
+  }
+  .body-text .proj {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-style: italic;
+    color: var(--navy);
+  }
+  .body-text a { color: var(--navy); text-decoration: none; border-bottom: 1px solid var(--gold); }
+
+  .meta-row {
+    display: flex;
+    justify-content: center;
+    gap: 46px;
+    margin-top: 22px;
+  }
+  .meta-item { text-align: center; }
+  .meta-item .k {
+    font-size: 10.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin-bottom: 4px;
+  }
+  .meta-item .v {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-size: 19px;
+    color: var(--navy);
+  }
+  .meta-item .v.version {
+    background: var(--navy);
+    color: var(--gold-bright);
+    padding: 3px 12px;
+    border-radius: 3px;
+    font-family: 'Jost', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.05em;
+  }
+
+  .footer-row {
+    margin-top: auto;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding-top: 24px;
+  }
+  .signature-block { text-align: center; width: 260px; }
+  .sig-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 600;
+    font-size: 22px;
+    color: var(--navy);
+    border-bottom: 1px solid var(--slate);
+    padding-bottom: 6px;
+  }
+  .sig-label {
+    margin-top: 6px;
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--slate);
+  }
+
+  .seal {
+    width: 92px;
+    height: 92px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, var(--gold-bright), var(--gold) 55%, #8a6a20 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.25), inset 0 0 0 3px rgba(255,255,255,0.25);
+    position: relative;
+  }
+  .seal::after {
+    content: "";
+    position: absolute;
+    inset: 8px;
+    border-radius: 50%;
+    border: 1px dashed rgba(255,255,255,0.6);
+  }
+  .seal span {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--navy-deep);
+    text-align: center;
+    line-height: 1.2;
+    letter-spacing: 0.05em;
+  }
+
+  .links-row {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 11.5px;
+    color: var(--slate);
+    letter-spacing: 0.02em;
+  }
+  .links-row a { color: var(--navy); text-decoration: none; margin: 0 8px; border-bottom: 1px solid var(--gold); }
+
+  @media print {
+    body { background: white; }
+    .stage { min-height: auto; padding: 0; }
+    .certificate { box-shadow: none; width: 100%; aspect-ratio: auto; }
+    @page { size: landscape; margin: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="certificate">
+    <div class="corner tl"></div>
+    <div class="corner tr"></div>
+    <div class="corner bl"></div>
+    <div class="corner br"></div>
+
+    <div class="header-row">
+      <div class="logo-wrap">
+        <img src="data:image/png;base64,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" alt="AB Talks logo">
+      </div>
+      <div class="program-tag">
+        <strong>60-Day Claude AI Challenge</strong>
+        10-Day Capstone Sprint
+      </div>
+    </div>
+
+    <div class="eyebrow">Certificate of Completion</div>
+    <div class="title">Capstone Sprint</div>
+    <div class="subtitle">AB Talks · 10-Day Capstone Sprint</div>
+
+    <div class="divider"></div>
+
+    <div class="presented-to">This certifies that</div>
+    <div class="recipient-wrap">
+      <div class="recipient">Ayushman Yadav</div>
+    </div>
+
+    <p class="body-text">
+      has successfully completed the AB Talks 10-Day Capstone Sprint — the final practical milestone
+      of the <strong>60-Day Claude AI Challenge</strong> — by independently designing, building, and
+      shipping a production-ready application: <span class="proj">CrackIt — AI Resume Defense Simulator</span>,
+      an adaptive AI mock-interview platform that cross-examines a candidate's resume against a target role
+      and delivers structured, scored feedback.
+    </p>
+
+    <div class="meta-row">
+      <div class="meta-item">
+        <div class="k">Project</div>
+        <div class="v">CrackIt</div>
+      </div>
+      <div class="meta-item">
+        <div class="k">Release</div>
+        <div class="v version">v1.0.0</div>
+      </div>
+      <div class="meta-item">
+        <div class="k">Completion Date</div>
+        <div class="v">July 30, 2026</div>
+      </div>
+    </div>
+
+    <div class="footer-row">
+      <div class="signature-block">
+        <div class="sig-name">Claude</div>
+        <div class="sig-label">AI Mentor &amp; Co-Creator · Claude (Free Tier)</div>
+      </div>
+
+      <div class="seal">
+        <span>AB<br>TALKS</span>
+      </div>
+
+      <div class="signature-block">
+        <div class="sig-name">AB Talks</div>
+        <div class="sig-label">60-Day Claude AI Challenge</div>
+      </div>
+    </div>
+
+    <div class="links-row">
+      <a href="https://www.abtalks.in/">abtalks.in</a> ·
+      <a href="https://www.linkedin.com/company/abtalks-on-ai/">LinkedIn: AB Talks on AI</a> ·
+      <a href="https://crackit-ai-interview.vercel.app">Live App</a> ·
+      <a href="https://github.com/ayushman6684/crackit-ai-interview">GitHub Repo</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>
